@@ -1,51 +1,15 @@
-here<!DOCTYPE html>
+html_code = '''<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gate Management System</title>
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
-        import { getFirestore, collection, addDoc, updateDoc, deleteDoc, doc, query, where, onSnapshot, getDocs, serverTimestamp, getDoc, setDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-
-        const firebaseConfig = {
-            apiKey: "AIzaSyBVho_BuuRkfRbuQzW2PWDYnJxxmC5yyAc",
-            authDomain: "gate-management-system-44cf5.firebaseapp.com",
-            projectId: "gate-management-system-44cf5",
-            storageBucket: "gate-management-system-44cf5.appspot.com",
-            messagingSenderId: "859920522798",
-            appId: "1:859920522798:web:d3ea86a373ce25ab0dc9bf"
-        };
-
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
-
-        try {
-            enableIndexedDbPersistence(db);
-        } catch (e) { console.log('Persistence not enabled'); }
-
-        window.firebaseApp = app;
-        window.firebaseAuth = auth;
-        window.firebaseDb = db;
-        window.firestoreCollection = collection;
-        window.firestoreAddDoc = addDoc;
-        window.firestoreUpdateDoc = updateDoc;
-        window.firestoreDeleteDoc = deleteDoc;
-        window.firestoreDoc = doc;
-        window.firestoreQuery = query;
-        window.firestoreWhere = where;
-        window.firestoreOnSnapshot = onSnapshot;
-        window.firestoreGetDocs = getDocs;
-        window.firestoreServerTimestamp = serverTimestamp;
-        window.firestoreGetDoc = getDoc;
-        window.firestoreSetDoc = setDoc;
-        window.firestoreSignIn = signInWithEmailAndPassword;
-        window.firebaseCreateUser = createUserWithEmailAndPassword;
-        window.firebaseOnAuthStateChanged = onAuthStateChanged;
-        window.firebaseSignOut = signOut;
-    </script>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
@@ -116,14 +80,12 @@ here<!DOCTYPE html>
         .stat-label { color: #7f8c8d; margin-top: 5px; font-size: 14px; }
         
         .hidden { display: none !important; }
-        
         .admin-badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; }
         
         @media print {
             .header, .nav-tabs, .action-btns, .btn { display: none !important; }
             .card { box-shadow: none; border: 1px solid #ddd; }
         }
-        
         @media (max-width: 768px) {
             .header-content { flex-direction: column; text-align: center; }
             .nav-tabs { justify-content: center; }
@@ -308,10 +270,7 @@ here<!DOCTYPE html>
                             </div>
                             <div class="form-group">
                                 <label data-en="Gate Pass" data-ar="Ø±Ù‚Ù… Ø§Ù„Ø¬ÙŠØª Ø¨Ø§Ø³">Gate Pass</label>
-                                <select id="fnqGP">
-                                    <option value="">Empty / ÙØ§Ø±Øº</option>
-                                </select>
-                                <input type="text" id="fnqGPCustom" placeholder="Or type GP number" style="margin-top: 5px;">
+                                <input type="text" id="fnqGP" placeholder="Empty / ÙØ§Ø±Øº">
                             </div>
                             <div class="form-group">
                                 <label data-en="Entry Time *" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø¯Ø®ÙˆÙ„ *">Entry Time *</label>
@@ -353,10 +312,7 @@ here<!DOCTYPE html>
                             </div>
                             <div class="form-group">
                                 <label data-en="Gate Pass" data-ar="Ø±Ù‚Ù… Ø§Ù„Ø¬ÙŠØª Ø¨Ø§Ø³">Gate Pass</label>
-                                <select id="fcpGP">
-                                    <option value="">Empty / ÙØ§Ø±Øº</option>
-                                </select>
-                                <input type="text" id="fcpGPCustom" placeholder="Or type GP number" style="margin-top: 5px;">
+                                <input type="text" id="fcpGP" placeholder="Empty / ÙØ§Ø±Øº">
                             </div>
                             <div class="form-group">
                                 <label data-en="Exit Time *" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø®Ø±ÙˆØ¬ *">Exit Time *</label>
@@ -513,28 +469,38 @@ here<!DOCTYPE html>
         </div>
     </div>
 
-    <script type="module">
-        let auth, db;
+    <script>
+        // Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyBVho_BuuRkfRbuQzW2PWDYnJxxmC5yyAc",
+            authDomain: "gate-management-system-44cf5.firebaseapp.com",
+            projectId: "gate-management-system-44cf5",
+            storageBucket: "gate-management-system-44cf5.appspot.com",
+            messagingSenderId: "859920522798",
+            appId: "1:859920522798:web:d3ea86a373ce25ab0dc9bf"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
+
+        // Global State
         let currentUser = null;
         let currentUserData = null;
         let isAdmin = false;
         let currentLang = 'en';
         let isOnline = navigator.onLine;
-        
-        document.addEventListener('DOMContentLoaded', async function() {
-            while (!window.firebaseAuth || !window.firebaseDb) {
-                await new Promise(resolve => setTimeout(resolve, 100));
-            }
-            
-            auth = window.firebaseAuth;
-            db = window.firebaseDb;
-            
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
             initStorage();
             setupEventListeners();
             setupNetworkListeners();
             setDefaultTimes();
             
-            window.firebaseOnAuthStateChanged(auth, async (user) => {
+            // Check auth state
+            auth.onAuthStateChanged(async (user) => {
                 if (user) {
                     currentUser = user;
                     await loadUserData(user.uid);
@@ -570,9 +536,9 @@ here<!DOCTYPE html>
 
         async function loadUserData(uid) {
             try {
-                const docSnap = await window.firestoreGetDoc(window.firestoreDoc(db, 'users', uid));
-                if (docSnap.exists()) {
-                    currentUserData = docSnap.data();
+                const doc = await db.collection('users').doc(uid).get();
+                if (doc.exists) {
+                    currentUserData = doc.data();
                     isAdmin = currentUserData.role === 'admin';
                 } else {
                     currentUserData = { email: currentUser.email, role: 'user' };
@@ -608,14 +574,14 @@ here<!DOCTYPE html>
             startRealtimeSync();
         }
 
+        // Auth Functions
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
-            const loginType = document.getElementById('loginType').value;
             
             try {
-                await window.firebaseSignIn(auth, email, password);
+                await auth.signInWithEmailAndPassword(email, password);
             } catch (error) {
                 document.getElementById('loginError').textContent = error.message;
             }
@@ -633,8 +599,8 @@ here<!DOCTYPE html>
             }
             
             try {
-                const userCredential = await window.firebaseCreateUser(window.firebaseAuth, email, password);
-                await window.firestoreSetDoc(window.firestoreDoc(db, 'users', userCredential.user.uid), {
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                await db.collection('users').doc(userCredential.user.uid).set({
                     email: email, role: 'admin', createdAt: new Date().toISOString()
                 });
                 
@@ -650,7 +616,7 @@ here<!DOCTYPE html>
         }
 
         async function logout() {
-            await window.firebaseSignOut(auth);
+            await auth.signOut();
             currentUser = null;
             currentUserData = null;
             isAdmin = false;
@@ -676,7 +642,7 @@ here<!DOCTYPE html>
             if (isOnline) {
                 try {
                     showSyncStatus(true);
-                    const docRef = await window.firestoreAddDoc(window.firestoreCollection(db, type), entry);
+                    const docRef = await db.collection(type).add(entry);
                     entry.firestoreId = docRef.id;
                     entry.synced = true;
                     
@@ -706,10 +672,7 @@ here<!DOCTYPE html>
             if (isOnline && localData[index].firestoreId) {
                 try {
                     showSyncStatus(true);
-                    await window.firestoreUpdateDoc(
-                        window.firestoreDoc(db, type, localData[index].firestoreId), 
-                        updates
-                    );
+                    await db.collection(type).doc(localData[index].firestoreId).update(updates);
                     localData[index].synced = true;
                     localStorage.setItem('gms_' + type, JSON.stringify(localData));
                     showSyncStatus(false);
@@ -735,7 +698,7 @@ here<!DOCTYPE html>
             for (const item of pending) {
                 try {
                     if (item.operation === 'add') {
-                        const docRef = await window.firestoreAddDoc(window.firestoreCollection(db, item.type), item.data);
+                        const docRef = await db.collection(item.type).add(item.data);
                         const localData = JSON.parse(localStorage.getItem('gms_' + item.type));
                         const idx = localData.findIndex(d => d.id === item.data.id);
                         if (idx !== -1) {
@@ -744,10 +707,7 @@ here<!DOCTYPE html>
                             localStorage.setItem('gms_' + item.type, JSON.stringify(localData));
                         }
                     } else if (item.operation === 'update' && item.data.firestoreId) {
-                        await window.firestoreUpdateDoc(
-                            window.firestoreDoc(db, item.type, item.data.firestoreId),
-                            item.data.updates
-                        );
+                        await db.collection(item.type).doc(item.data.firestoreId).update(item.data.updates);
                     }
                 } catch (error) {
                     console.log('Sync error:', error);
@@ -761,7 +721,7 @@ here<!DOCTYPE html>
         function startRealtimeSync() {
             const types = ['visits', 'fnq', 'fcp'];
             types.forEach(type => {
-                window.firestoreOnSnapshot(window.firestoreCollection(db, type), (snapshot) => {
+                db.collection(type).onSnapshot((snapshot) => {
                     const firebaseData = [];
                     snapshot.forEach(doc => {
                         firebaseData.push({ ...doc.data(), firestoreId: doc.id, synced: true });
@@ -793,61 +753,128 @@ here<!DOCTYPE html>
         }
 
         // Form Handlers
-        document.getElementById('loginForm').addEventListener('submit', handleLogin);
-        document.getElementById('adminSetupForm').addEventListener('submit', handleAdminSetup);
-        
-        document.getElementById('visitForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            await saveEntry('visits', {
-                driver: document.getElementById('visitDriver').value,
-                company: document.getElementById('visitCompany').value,
-                vehicle: document.getElementById('visitVehicle').value,
-                destination: document.getElementById('visitDestination').value,
-                entryTime: document.getElementById('visitEntryTime').value,
-                exitTime: null, status: 'in'
-            });
-            document.getElementById('visitForm').reset();
-            setDefaultTimes();
-            loadVisitsTable();
-            alert('Saved!');
-        });
-
-        document.getElementById('fnqForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const gpSelect = document.getElementById('fnqGP').value;
-            const gpCustom = document.getElementById('fnqGPCustom').value;
-            const gp = gpCustom || gpSelect || '';
+        function setupEventListeners() {
+            document.getElementById('loginForm').addEventListener('submit', handleLogin);
+            document.getElementById('adminSetupForm').addEventListener('submit', handleAdminSetup);
             
-            await saveEntry('fnq', {
-                vehicle: document.getElementById('fnqVehicle').value,
-                company: document.getElementById('fnqCompany').value,
-                gatePass: gp,
-                entryTime: document.getElementById('fnqEntryTime').value,
-                exitTime: null, status: 'in'
+            document.getElementById('visitForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                await saveEntry('visits', {
+                    driver: document.getElementById('visitDriver').value,
+                    company: document.getElementById('visitCompany').value,
+                    vehicle: document.getElementById('visitVehicle').value,
+                    destination: document.getElementById('visitDestination').value,
+                    entryTime: document.getElementById('visitEntryTime').value,
+                    exitTime: null, status: 'in'
+                });
+                document.getElementById('visitForm').reset();
+                setDefaultTimes();
+                loadVisitsTable();
+                alert('Saved!');
             });
-            document.getElementById('fnqForm').reset();
-            setDefaultTimes();
-            loadFNQTable();
-            alert('Saved!');
-        });
 
-        document.getElementById('fcpForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const gpSelect = document.getElementById('fcpGP').value;
-            const gpCustom = document.getElementById('fcpGPCustom').value;
-            const gp = gpCustom || gpSelect || '';
-            
-            await saveEntry('fcp', {
-                vehicle: document.getElementById('fcpVehicle').value,
-                gatePass: gp,
-                exitTime: document.getElementById('fcpExitTime').value,
-                status: 'out'
+            document.getElementById('fnqForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const gp = document.getElementById('fnqGP').value || '';
+                
+                await saveEntry('fnq', {
+                    vehicle: document.getElementById('fnqVehicle').value,
+                    company: document.getElementById('fnqCompany').value,
+                    gatePass: gp,
+                    entryTime: document.getElementById('fnqEntryTime').value,
+                    exitTime: null, status: 'in'
+                });
+                document.getElementById('fnqForm').reset();
+                setDefaultTimes();
+                loadFNQTable();
+                alert('Saved!');
             });
-            document.getElementById('fcpForm').reset();
-            setDefaultTimes();
-            loadFCPTable();
-            alert('Saved!');
-        });
+
+            document.getElementById('fcpForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const gp = document.getElementById('fcpGP').value || '';
+                
+                await saveEntry('fcp', {
+                    vehicle: document.getElementById('fcpVehicle').value,
+                    gatePass: gp,
+                    exitTime: document.getElementById('fcpExitTime').value,
+                    status: 'out'
+                });
+                document.getElementById('fcpForm').reset();
+                setDefaultTimes();
+                loadFCPTable();
+                alert('Saved!');
+            });
+
+            document.getElementById('addUserForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                if (!isAdmin) return;
+                
+                const email = document.getElementById('newUserEmail').value;
+                const password = document.getElementById('newUserPassword').value;
+                const role = document.getElementById('newUserRole').value;
+                
+                try {
+                    const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                    await db.collection('users').doc(userCredential.user.uid).set({
+                        email, role, createdAt: new Date().toISOString()
+                    });
+                    
+                    const users = JSON.parse(localStorage.getItem('gms_users'));
+                    users.push({ email, role, uid: userCredential.user.uid });
+                    localStorage.setItem('gms_users', JSON.stringify(users));
+                    
+                    document.getElementById('addUserForm').reset();
+                    loadUsers();
+                    alert('User added!');
+                } catch (error) {
+                    alert(error.message);
+                }
+            });
+
+            document.getElementById('addCompanyForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const type = document.getElementById('companyType').value;
+                const name = document.getElementById('newCompanyName').value.trim();
+                const key = 'gms_companies_' + type;
+                const companies = JSON.parse(localStorage.getItem(key));
+                if (!companies.includes(name)) {
+                    companies.push(name);
+                    localStorage.setItem(key, JSON.stringify(companies));
+                    loadCompanies();
+                }
+                closeCompanyModal();
+            });
+
+            document.getElementById('editForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = parseInt(document.getElementById('editId').value);
+                const type = document.getElementById('editType').value;
+                
+                let updates;
+                if (type === 'visits') {
+                    updates = {
+                        driver: document.getElementById('editDriver').value,
+                        company: document.getElementById('editCompany').value,
+                        vehicle: document.getElementById('editVehicle').value,
+                        destination: document.getElementById('editDestination').value,
+                        entryTime: document.getElementById('editEntryTime').value
+                    };
+                } else {
+                    updates = {
+                        vehicle: document.getElementById('editVehicle').value,
+                        company: document.getElementById('editCompany').value,
+                        gatePass: document.getElementById('editGP').value,
+                        entryTime: document.getElementById('editEntryTime').value
+                    };
+                }
+                
+                await updateEntry(type, id, updates);
+                closeEditModal();
+                loadAllTables();
+                alert('Updated!');
+            });
+        }
 
         window.checkoutEntry = async function(type, id) {
             if (!confirm('Confirm checkout?')) return;
@@ -927,45 +954,6 @@ here<!DOCTYPE html>
             `).join('');
         }
 
-        function loadFNQTable() {
-            let fnq = JSON.parse(localStorage.getItem('gms_fnq'));
-            if (!isAdmin) {
-                fnq = fnq.filter(f => f.createdByUid === currentUser.uid);
-            }
-            const active = fnq.filter(f => f.status === 'in');
-            const tbody = document.getElementById('fnqTable');
-            
-            tbody.innerHTML = active.map(f => `
-                <tr>
-                    <td>${f.vehicle}</td>
-                    <td>${f.company}</td>
-                    <td>${f.gatePass || '-'}</td>
-                    <td>${formatDateTime(f.entryTime)} ${!f.synced ? '<span class="sync-pending">âŒ›</span>' : ''}</td>
-                    <td class="action-btns">
-                        <button onclick="editEntry('fnq', ${f.id})" class="btn-small btn-warning">Edit</button>
-                        <button onclick="checkoutEntry('fnq', ${f.id})" class="btn-small btn-danger">Out</button>
-                    </td>
-                </tr>
-            `).join('');
-        }
-
-        function loadFCPTable() {
-            let fcp = JSON.parse(localStorage.getItem('gms_fcp'));
-            if (!isAdmin) {
-                fcp = fcp.filter(f => f.createdByUid === currentUser.uid);
-            }
-            const tbody = document.getElementById('fcpTable');
-            
-            tbody.innerHTML = fcp.map(f => `
-                <tr>
-                    <td>${f.vehicle}</td>
-                    <td>${f.gatePass || '-'}</td>
-                    <td>${formatDateTime(f.exitTime)} ${!f.synced ? '<span class="sync-pending">âŒ›</span>' : ''}</td>
-                    <td><span class="status-out">OUT</span></td>
-                </tr>
-            `).join('');
-        }
-
         function loadAllTables() {
             loadVisitsTable();
             loadFNQTable();
@@ -1009,7 +997,7 @@ here<!DOCTYPE html>
             
             let users = [];
             try {
-                const snapshot = await window.firestoreGetDocs(window.firestoreCollection(db, 'users'));
+                const snapshot = await db.collection('users').get();
                 snapshot.forEach(doc => users.push(doc.data()));
             } catch (e) {
                 users = JSON.parse(localStorage.getItem('gms_users'));
@@ -1025,46 +1013,6 @@ here<!DOCTYPE html>
                 </tr>
             `).join('');
         }
-
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            if (!isAdmin) return;
-            
-            const email = document.getElementById('newUserEmail').value;
-            const password = document.getElementById('newUserPassword').value;
-            const role = document.getElementById('newUserRole').value;
-            
-            try {
-                const userCredential = await window.firebaseCreateUser(window.firebaseAuth, email, password);
-                await window.firestoreSetDoc(window.firestoreDoc(db, 'users', userCredential.user.uid), {
-                    email, role, createdAt: new Date().toISOString()
-                });
-                
-                const users = JSON.parse(localStorage.getItem('gms_users'));
-                users.push({ email, role, uid: userCredential.user.uid });
-                localStorage.setItem('gms_users', JSON.stringify(users));
-                
-                document.getElementById('addUserForm').reset();
-                loadUsers();
-                alert('User added!');
-            } catch (error) {
-                alert(error.message);
-            }
-        });
-
-        document.getElementById('addCompanyForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            const type = document.getElementById('companyType').value;
-            const name = document.getElementById('newCompanyName').value.trim();
-            const key = 'gms_companies_' + type;
-            const companies = JSON.parse(localStorage.getItem(key));
-            if (!companies.includes(name)) {
-                companies.push(name);
-                localStorage.setItem(key, JSON.stringify(companies));
-                loadCompanies();
-            }
-            closeCompanyModal();
-        });
 
         function loadCompanies() {
             const companies = JSON.parse(localStorage.getItem('gms_companies_fnq'));
@@ -1108,7 +1056,7 @@ here<!DOCTYPE html>
                     <div class="form-group"><label>Destination</label><input type="text" id="editDestination" value="${entry.destination}" required></div>
                     <div class="form-group"><label>Entry Time</label><input type="datetime-local" id="editEntryTime" value="${entry.entryTime}" required></div>
                 `;
-            } else if (type === 'fnq') {
+            } else {
                 fieldsHtml = `
                     <div class="form-group"><label>Vehicle</label><input type="text" id="editVehicle" value="${entry.vehicle}" required></div>
                     <div class="form-group"><label>Company</label><input type="text" id="editCompany" value="${entry.company}" required></div>
@@ -1119,35 +1067,6 @@ here<!DOCTYPE html>
             document.getElementById('editFields').innerHTML = fieldsHtml;
             document.getElementById('editModal').classList.add('active');
         };
-
-        document.getElementById('editForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const id = parseInt(document.getElementById('editId').value);
-            const type = document.getElementById('editType').value;
-            
-            let updates;
-            if (type === 'visits') {
-                updates = {
-                    driver: document.getElementById('editDriver').value,
-                    company: document.getElementById('editCompany').value,
-                    vehicle: document.getElementById('editVehicle').value,
-                    destination: document.getElementById('editDestination').value,
-                    entryTime: document.getElementById('editEntryTime').value
-                };
-            } else {
-                updates = {
-                    vehicle: document.getElementById('editVehicle').value,
-                    company: document.getElementById('editCompany').value,
-                    gatePass: document.getElementById('editGP').value,
-                    entryTime: document.getElementById('editEntryTime').value
-                };
-            }
-            
-            await updateEntry(type, id, updates);
-            closeEditModal();
-            loadAllTables();
-            alert('Updated!');
-        });
     </script>
 </body>
 </html>'''
