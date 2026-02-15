@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+  <!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
@@ -41,6 +41,18 @@
         .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; flex-wrap: wrap; gap: 15px; }
         .header h1 { font-size: 20px; }
         .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
+        
+        /* تاريخ ووقت واضحين في الهيدر */
+        .datetime-display { 
+            background: rgba(255,255,255,0.15); 
+            padding: 8px 15px; 
+            border-radius: 6px; 
+            text-align: center;
+            min-width: 150px;
+        }
+        .datetime-display .date { font-size: 16px; font-weight: bold; color: #fff; }
+        .datetime-display .time { font-size: 14px; color: #ecf0f1; }
+        
         .connection-status { padding: 4px 8px; border-radius: 4px; font-size: 12px; font-weight: bold; }
         .online { background: #27ae60; }
         .offline { background: #e74c3c; }
@@ -65,6 +77,15 @@
         .status-out { color: #e74c3c; font-weight: bold; }
         .sync-pending { color: #f39c12; font-size: 12px; }
         
+        /* عرض التاريخ والوقت في كل سجل */
+        .record-datetime {
+            background: #ecf0f1;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 13px;
+        }
+        
         .action-btns { display: flex; gap: 5px; }
         .btn-small { padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
         
@@ -82,6 +103,12 @@
         .hidden { display: none !important; }
         .admin-badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; }
         
+        /* حقول الوقت - read only */
+        .time-field {
+            background: #ecf0f1 !important;
+            cursor: not-allowed;
+        }
+        
         @media print {
             .header, .nav-tabs, .action-btns, .btn { display: none !important; }
             .card { box-shadow: none; border: 1px solid #ddd; }
@@ -89,6 +116,7 @@
         @media (max-width: 768px) {
             .header-content { flex-direction: column; text-align: center; }
             .nav-tabs { justify-content: center; }
+            .datetime-display { width: 100%; }
         }
     </style>
 </head>
@@ -96,28 +124,28 @@
     <!-- Login Page -->
     <div id="loginPage" class="login-container">
         <div class="login-box">
-            <h1 data-en="Gate Management System" data-ar="Ù†Ø¸Ø§Ù… Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø¨ÙˆØ§Ø¨Ø©">Gate Management System</h1>
+            <h1 data-en="Gate Management System" data-ar="نظام إدارة البوابة">Gate Management System</h1>
             <form id="loginForm">
                 <div class="form-group">
-                    <label data-en="Email" data-ar="Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ">Email</label>
+                    <label data-en="Email" data-ar="البريد الإلكتروني">Email</label>
                     <input type="email" id="email" required>
                 </div>
                 <div class="form-group">
-                    <label data-en="Password" data-ar="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±">Password</label>
+                    <label data-en="Password" data-ar="كلمة المرور">Password</label>
                     <input type="password" id="password" required>
                 </div>
                 <div class="form-group">
-                    <label data-en="Login As" data-ar="ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„ ÙƒÙ€">Login As</label>
+                    <label data-en="Login As" data-ar="تسجيل الدخول كـ">Login As</label>
                     <select id="loginType">
-                        <option value="user" data-en="User" data-ar="Ù…Ø³ØªØ®Ø¯Ù…">User</option>
-                        <option value="admin" data-en="Admin" data-ar="Ø£Ø¯Ù…Ù†">Admin</option>
+                        <option value="user" data-en="User" data-ar="مستخدم">User</option>
+                        <option value="admin" data-en="Admin" data-ar="أدمن">Admin</option>
                     </select>
                 </div>
-                <button type="submit" class="btn" data-en="Login" data-ar="ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø¯Ø®ÙˆÙ„">Login</button>
+                <button type="submit" class="btn" data-en="Login" data-ar="تسجيل الدخول">Login</button>
             </form>
             <div id="loginError" class="error-message"></div>
             <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-            <button onclick="showAdminSetup()" class="btn btn-secondary" data-en="First Time Setup" data-ar="Ø¥Ø¹Ø¯Ø§Ø¯ Ø£ÙˆÙ„ Ù…Ø±Ø©">First Time Setup</button>
+            <button onclick="showAdminSetup()" class="btn btn-secondary" data-en="First Time Setup" data-ar="إعداد أول مرة">First Time Setup</button>
         </div>
     </div>
 
@@ -125,23 +153,23 @@
     <div id="adminSetupModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 data-en="Create Admin Account" data-ar="Ø¥Ù†Ø´Ø§Ø¡ Ø­Ø³Ø§Ø¨ Ø§Ù„Ø£Ø¯Ù…Ù†">Create Admin Account</h3>
+                <h3 data-en="Create Admin Account" data-ar="إنشاء حساب الأدمن">Create Admin Account</h3>
                 <button class="close-modal" onclick="closeAdminSetup()">&times;</button>
             </div>
             <form id="adminSetupForm">
                 <div class="form-group">
-                    <label data-en="Admin Email" data-ar="Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø£Ø¯Ù…Ù†">Admin Email</label>
+                    <label data-en="Admin Email" data-ar="بريد الأدمن">Admin Email</label>
                     <input type="email" id="adminEmail" required>
                 </div>
                 <div class="form-group">
-                    <label data-en="Password" data-ar="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±">Password</label>
+                    <label data-en="Password" data-ar="كلمة المرور">Password</label>
                     <input type="password" id="adminPassword" required minlength="6">
                 </div>
                 <div class="form-group">
-                    <label data-en="Confirm Password" data-ar="ØªØ£ÙƒÙŠØ¯ ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ±">Confirm Password</label>
+                    <label data-en="Confirm Password" data-ar="تأكيد كلمة المرور">Confirm Password</label>
                     <input type="password" id="adminConfirmPassword" required>
                 </div>
-                <button type="submit" class="btn btn-success" data-en="Create Account" data-ar="Ø¥Ù†Ø´Ø§Ø¡ Ø§Ù„Ø­Ø³Ø§Ø¨">Create Account</button>
+                <button type="submit" class="btn btn-success" data-en="Create Account" data-ar="إنشاء الحساب">Create Account</button>
             </form>
         </div>
     </div>
@@ -150,14 +178,21 @@
     <div id="dashboard" class="hidden">
         <div class="header">
             <div class="header-content">
-                <h1 data-en="Gate Management System" data-ar="Ù†Ø¸Ø§Ù… Ø¥Ø¯Ø§Ø±Ø© Ø§Ù„Ø¨ÙˆØ§Ø¨Ø©">Gate Management System</h1>
+                <h1 data-en="Gate Management System" data-ar="نظام إدارة البوابة">Gate Management System</h1>
+                
+                <!-- عرض التاريخ والوقت واضحين في الهيدر -->
+                <div class="datetime-display">
+                    <div class="date" id="headerDate">--/--/----</div>
+                    <div class="time" id="headerTime">--:--:--</div>
+                </div>
+                
                 <div class="user-info">
                     <span id="connectionStatus" class="connection-status offline">OFFLINE</span>
                     <span id="syncStatus" class="sync-status">SYNCING...</span>
                     <span id="currentUser"></span>
                     <span id="adminBadge" class="admin-badge hidden">ADMIN</span>
                     <button class="lang-switch" onclick="toggleLanguage()">EN/AR</button>
-                    <button class="logout-btn" onclick="logout()" data-en="Logout" data-ar="Ø®Ø±ÙˆØ¬">Logout</button>
+                    <button class="logout-btn" onclick="logout()" data-en="Logout" data-ar="خروج">Logout</button>
                 </div>
             </div>
         </div>
@@ -166,50 +201,50 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div class="stat-number" id="statToday">0</div>
-                    <div class="stat-label" data-en="Today's Entries" data-ar="Ù…Ø¯Ø®Ù„Ø§Øª Ø§Ù„ÙŠÙˆÙ…">Today's Entries</div>
+                    <div class="stat-label" data-en="Today's Entries" data-ar="مدخلات اليوم">Today's Entries</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="statInside">0</div>
-                    <div class="stat-label" data-en="Currently Inside" data-ar="Ø¨Ø¯Ø§Ø®Ù„ Ø§Ù„Ø¢Ù†">Currently Inside</div>
+                    <div class="stat-label" data-en="Currently Inside" data-ar="بداخل الآن">Currently Inside</div>
                 </div>
                 <div class="stat-card">
                     <div class="stat-number" id="statExited">0</div>
-                    <div class="stat-label" data-en="Exited Today" data-ar="Ø®Ø±Ø¬ÙˆØ§ Ø§Ù„ÙŠÙˆÙ…">Exited Today</div>
+                    <div class="stat-label" data-en="Exited Today" data-ar="خرجوا اليوم">Exited Today</div>
                 </div>
             </div>
 
             <div class="nav-tabs">
-                <button class="nav-tab active" onclick="showSection('visits')" data-en="Visits" data-ar="Ø§Ù„Ø²ÙŠØ§Ø±Ø§Øª">Visits</button>
+                <button class="nav-tab active" onclick="showSection('visits')" data-en="Visits" data-ar="الزيارات">Visits</button>
                 <button class="nav-tab" onclick="showSection('fnq')" data-en="FNQ" data-ar="FNQ">FNQ</button>
                 <button class="nav-tab" onclick="showSection('fcp')" data-en="FCP" data-ar="FCP">FCP</button>
                 <button class="nav-tab" onclick="showSection('frf')" data-en="FRF" data-ar="FRF">FRF</button>
                 <button class="nav-tab" onclick="showSection('fmtf')" data-en="FMTF" data-ar="FMTF">FMTF</button>
-                <button class="nav-tab" onclick="showSection('history')" data-en="History" data-ar="Ø§Ù„Ø³Ø¬Ù„">History</button>
-                <button class="nav-tab" onclick="showSection('users')" id="usersTab" data-en="Users" data-ar="Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ†" style="display:none;">Users</button>
+                <button class="nav-tab" onclick="showSection('history')" data-en="History" data-ar="السجل">History</button>
+                <button class="nav-tab" onclick="showSection('users')" id="usersTab" data-en="Users" data-ar="المستخدمين" style="display:none;">Users</button>
             </div>
 
             <!-- Visits Section -->
             <div id="visitsSection" class="section">
                 <div class="card">
-                    <h2 data-en="New Visit Entry" data-ar="ØªØ³Ø¬ÙŠÙ„ Ø²ÙŠØ§Ø±Ø© Ø¬Ø¯ÙŠØ¯Ø©">New Visit Entry</h2>
+                    <h2 data-en="New Visit Entry" data-ar="تسجيل زيارة جديدة">New Visit Entry</h2>
                     <form id="visitForm">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <div class="form-group">
-                                <label data-en="Driver Name *" data-ar="Ø§Ø³Ù… Ø§Ù„Ø³Ø§Ø¦Ù‚ *">Driver Name *</label>
+                                <label data-en="Driver Name *" data-ar="اسم السائق *">Driver Name *</label>
                                 <input type="text" id="visitDriver" required>
                             </div>
                             <div class="form-group">
-                                <label data-en="Company Name *" data-ar="Ø§Ø³Ù… Ø§Ù„Ø´Ø±ÙƒØ© *">Company Name *</label>
+                                <label data-en="Company Name *" data-ar="اسم الشركة *">Company Name *</label>
                                 <input type="text" id="visitCompany" required>
                             </div>
                             <div class="form-group">
-                                <label data-en="Vehicle Number *" data-ar="Ø±Ù‚Ù… Ø§Ù„Ø³ÙŠØ§Ø±Ø© *">Vehicle Number *</label>
+                                <label data-en="Vehicle Number *" data-ar="رقم السيارة *">Vehicle Number *</label>
                                 <input type="text" id="visitVehicle" required>
                             </div>
                             <div class="form-group">
-                                <label data-en="Destination *" data-ar="Ø§Ù„ÙˆØ¬Ù‡Ø© *">Destination *</label>
+                                <label data-en="Destination *" data-ar="الوجهة *">Destination *</label>
                                 <select id="visitDestination" required>
-                                    <option value="">Select / Ø§Ø®ØªØ±</option>
+                                    <option value="">Select / اختر</option>
                                     <option value="FNQ">FNQ</option>
                                     <option value="FCP">FCP</option>
                                     <option value="OMAG">OMAG</option>
@@ -220,27 +255,25 @@
                                     <option value="WORK SHOP">WORK SHOP</option>
                                 </select>
                             </div>
-                            <div class="form-group">
-                                <label data-en="Entry Time *" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø¯Ø®ÙˆÙ„ *">Entry Time *</label>
-                                <input type="datetime-local" id="visitEntryTime" required>
-                            </div>
+                            <!-- الوقت التلقائي - hidden field -->
+                            <input type="hidden" id="visitEntryTime">
                         </div>
-                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Save Entry" data-ar="Ø­ÙØ¸">Save Entry</button>
+                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Save Entry" data-ar="حفظ">Save Entry</button>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h2 data-en="Active Visits" data-ar="Ø§Ù„Ø²ÙŠØ§Ø±Ø§Øª Ø§Ù„Ù†Ø´Ø·Ø©">Active Visits</h2>
+                    <h2 data-en="Active Visits" data-ar="الزيارات النشطة">Active Visits</h2>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th data-en="Driver" data-ar="Ø§Ù„Ø³Ø§Ø¦Ù‚">Driver</th>
-                                    <th data-en="Company" data-ar="Ø§Ù„Ø´Ø±ÙƒØ©">Company</th>
-                                    <th data-en="Vehicle" data-ar="Ø§Ù„Ø³ÙŠØ§Ø±Ø©">Vehicle</th>
-                                    <th data-en="Destination" data-ar="Ø§Ù„ÙˆØ¬Ù‡Ø©">Destination</th>
-                                    <th data-en="Entry Time" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø¯Ø®ÙˆÙ„">Entry Time</th>
-                                    <th data-en="Actions" data-ar="Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª">Actions</th>
+                                    <th data-en="Driver" data-ar="السائق">Driver</th>
+                                    <th data-en="Company" data-ar="الشركة">Company</th>
+                                    <th data-en="Vehicle" data-ar="السيارة">Vehicle</th>
+                                    <th data-en="Destination" data-ar="الوجهة">Destination</th>
+                                    <th data-en="Entry Time" data-ar="وقت الدخول">Entry Time</th>
+                                    <th data-en="Actions" data-ar="إجراءات">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="visitsTable"></tbody>
@@ -252,46 +285,44 @@
             <!-- FNQ Section -->
             <div id="fnqSection" class="section hidden">
                 <div class="card">
-                    <h2 data-en="FNQ Entry" data-ar="ØªØ³Ø¬ÙŠÙ„ FNQ">FNQ Entry</h2>
+                    <h2 data-en="FNQ Entry" data-ar="تسجيل FNQ">FNQ Entry</h2>
                     <form id="fnqForm">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <div class="form-group">
-                                <label data-en="Vehicle Number *" data-ar="Ø±Ù‚Ù… Ø§Ù„Ø³ÙŠØ§Ø±Ø© *">Vehicle Number *</label>
+                                <label data-en="Vehicle Number *" data-ar="رقم السيارة *">Vehicle Number *</label>
                                 <input type="text" id="fnqVehicle" required>
                             </div>
                             <div class="form-group">
-                                <label data-en="Company Name *" data-ar="Ø§Ø³Ù… Ø§Ù„Ø´Ø±ÙƒØ© *">Company Name *</label>
+                                <label data-en="Company Name *" data-ar="اسم الشركة *">Company Name *</label>
                                 <div style="display: flex; gap: 5px;">
                                     <select id="fnqCompany" style="flex: 1;" required>
-                                        <option value="">Select / Ø§Ø®ØªØ±</option>
+                                        <option value="">Select / اختر</option>
                                     </select>
                                     <button type="button" onclick="showAddCompany('fnq')" class="btn btn-secondary" style="width: auto; padding: 0 15px;">+</button>
                                 </div>
                             </div>
                             <div class="form-group">
-                                <label data-en="Gate Pass" data-ar="Ø±Ù‚Ù… Ø§Ù„Ø¬ÙŠØª Ø¨Ø§Ø³">Gate Pass</label>
-                                <input type="text" id="fnqGP" placeholder="Empty / ÙØ§Ø±Øº">
+                                <label data-en="Gate Pass" data-ar="رقم الجيت باس">Gate Pass</label>
+                                <input type="text" id="fnqGP" placeholder="Empty / فارغ">
                             </div>
-                            <div class="form-group">
-                                <label data-en="Entry Time *" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø¯Ø®ÙˆÙ„ *">Entry Time *</label>
-                                <input type="datetime-local" id="fnqEntryTime" required>
-                            </div>
+                            <!-- الوقت التلقائي - hidden field -->
+                            <input type="hidden" id="fnqEntryTime">
                         </div>
-                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Save Entry" data-ar="Ø­ÙØ¸">Save Entry</button>
+                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Save Entry" data-ar="حفظ">Save Entry</button>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h2 data-en="Active FNQ" data-ar="FNQ Ø§Ù„Ù†Ø´Ø·">Active FNQ</h2>
+                    <h2 data-en="Active FNQ" data-ar="FNQ النشط">Active FNQ</h2>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th data-en="Vehicle" data-ar="Ø§Ù„Ø³ÙŠØ§Ø±Ø©">Vehicle</th>
-                                    <th data-en="Company" data-ar="Ø§Ù„Ø´Ø±ÙƒØ©">Company</th>
-                                    <th data-en="Gate Pass" data-ar="Ø§Ù„Ø¬ÙŠØª Ø¨Ø§Ø³">Gate Pass</th>
-                                    <th data-en="Entry Time" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø¯Ø®ÙˆÙ„">Entry Time</th>
-                                    <th data-en="Actions" data-ar="Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª">Actions</th>
+                                    <th data-en="Vehicle" data-ar="السيارة">Vehicle</th>
+                                    <th data-en="Company" data-ar="الشركة">Company</th>
+                                    <th data-en="Gate Pass" data-ar="الجيت باس">Gate Pass</th>
+                                    <th data-en="Entry Time" data-ar="وقت الدخول">Entry Time</th>
+                                    <th data-en="Actions" data-ar="إجراءات">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="fnqTable"></tbody>
@@ -303,36 +334,34 @@
             <!-- FCP Section -->
             <div id="fcpSection" class="section hidden">
                 <div class="card">
-                    <h2 data-en="FCP Exit" data-ar="Ø®Ø±ÙˆØ¬ FCP">FCP Exit</h2>
+                    <h2 data-en="FCP Exit" data-ar="خروج FCP">FCP Exit</h2>
                     <form id="fcpForm">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <div class="form-group">
-                                <label data-en="Vehicle Number *" data-ar="Ø±Ù‚Ù… Ø§Ù„Ø³ÙŠØ§Ø±Ø© *">Vehicle Number *</label>
+                                <label data-en="Vehicle Number *" data-ar="رقم السيارة *">Vehicle Number *</label>
                                 <input type="text" id="fcpVehicle" required>
                             </div>
                             <div class="form-group">
-                                <label data-en="Gate Pass" data-ar="Ø±Ù‚Ù… Ø§Ù„Ø¬ÙŠØª Ø¨Ø§Ø³">Gate Pass</label>
-                                <input type="text" id="fcpGP" placeholder="Empty / ÙØ§Ø±Øº">
+                                <label data-en="Gate Pass" data-ar="رقم الجيت باس">Gate Pass</label>
+                                <input type="text" id="fcpGP" placeholder="Empty / فارغ">
                             </div>
-                            <div class="form-group">
-                                <label data-en="Exit Time *" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø®Ø±ÙˆØ¬ *">Exit Time *</label>
-                                <input type="datetime-local" id="fcpExitTime" required>
-                            </div>
+                            <!-- الوقت التلقائي - hidden field -->
+                            <input type="hidden" id="fcpExitTime">
                         </div>
-                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Record Exit" data-ar="ØªØ³Ø¬ÙŠÙ„ Ø§Ù„Ø®Ø±ÙˆØ¬">Record Exit</button>
+                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Record Exit" data-ar="تسجيل الخروج">Record Exit</button>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h2 data-en="Today's FCP Exits" data-ar="Ø®Ø±ÙˆØ¬ FCP Ø§Ù„ÙŠÙˆÙ…">Today's FCP Exits</h2>
+                    <h2 data-en="Today's FCP Exits" data-ar="خروج FCP اليوم">Today's FCP Exits</h2>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th data-en="Vehicle" data-ar="Ø§Ù„Ø³ÙŠØ§Ø±Ø©">Vehicle</th>
-                                    <th data-en="Gate Pass" data-ar="Ø§Ù„Ø¬ÙŠØª Ø¨Ø§Ø³">Gate Pass</th>
-                                    <th data-en="Exit Time" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø®Ø±ÙˆØ¬">Exit Time</th>
-                                    <th data-en="Status" data-ar="Ø§Ù„Ø­Ø§Ù„Ø©">Status</th>
+                                    <th data-en="Vehicle" data-ar="السيارة">Vehicle</th>
+                                    <th data-en="Gate Pass" data-ar="الجيت باس">Gate Pass</th>
+                                    <th data-en="Exit Time" data-ar="وقت الخروج">Exit Time</th>
+                                    <th data-en="Status" data-ar="الحالة">Status</th>
                                 </tr>
                             </thead>
                             <tbody id="fcpTable"></tbody>
@@ -344,28 +373,28 @@
             <!-- FRF Section -->
             <div id="frfSection" class="section hidden">
                 <div class="card">
-                    <h2 data-en="FRF - Reserved" data-ar="FRF - Ù…Ø­Ø¬ÙˆØ²">FRF - Reserved</h2>
-                    <p data-en="This section is ready for future implementation." data-ar="Ù‡Ø°Ø§ Ø§Ù„Ù‚Ø³Ù… Ø¬Ø§Ù‡Ø² Ù„Ù„ØªÙ†ÙÙŠØ° Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ÙŠ.">This section is ready for future implementation.</p>
+                    <h2 data-en="FRF - Reserved" data-ar="FRF - محجوز">FRF - Reserved</h2>
+                    <p data-en="This section is ready for future implementation." data-ar="هذا القسم جاهز للتنفيذ المستقبلي.">This section is ready for future implementation.</p>
                 </div>
             </div>
 
             <!-- FMTF Section -->
             <div id="fmtfSection" class="section hidden">
                 <div class="card">
-                    <h2 data-en="FMTF - Reserved" data-ar="FMTF - Ù…Ø­Ø¬ÙˆØ²">FMTF - Reserved</h2>
-                    <p data-en="This section is ready for future implementation." data-ar="Ù‡Ø°Ø§ Ø§Ù„Ù‚Ø³Ù… Ø¬Ø§Ù‡Ø² Ù„Ù„ØªÙ†ÙÙŠØ° Ø§Ù„Ù…Ø³ØªÙ‚Ø¨Ù„ÙŠ.">This section is ready for future implementation.</p>
+                    <h2 data-en="FMTF - Reserved" data-ar="FMTF - محجوز">FMTF - Reserved</h2>
+                    <p data-en="This section is ready for future implementation." data-ar="هذا القسم جاهز للتنفيذ المستقبلي.">This section is ready for future implementation.</p>
                 </div>
             </div>
 
             <!-- History Section -->
             <div id="historySection" class="section hidden">
                 <div class="card">
-                    <h2 data-en="History" data-ar="Ø§Ù„Ø³Ø¬Ù„">History</h2>
+                    <h2 data-en="History" data-ar="السجل">History</h2>
                     <div class="form-group" style="margin-bottom: 20px;">
-                        <label data-en="Filter by Type" data-ar="ØªØµÙÙŠØ© Ø­Ø³Ø¨ Ø§Ù„Ù†ÙˆØ¹">Filter by Type</label>
+                        <label data-en="Filter by Type" data-ar="تصفية حسب النوع">Filter by Type</label>
                         <select id="historyFilter" onchange="loadHistory()">
-                            <option value="all" data-en="All" data-ar="Ø§Ù„ÙƒÙ„">All</option>
-                            <option value="visit" data-en="Visits" data-ar="Ø§Ù„Ø²ÙŠØ§Ø±Ø§Øª">Visits</option>
+                            <option value="all" data-en="All" data-ar="الكل">All</option>
+                            <option value="visit" data-en="Visits" data-ar="الزيارات">Visits</option>
                             <option value="fnq" data-en="FNQ" data-ar="FNQ">FNQ</option>
                             <option value="fcp" data-en="FCP" data-ar="FCP">FCP</option>
                         </select>
@@ -374,56 +403,56 @@
                         <table>
                             <thead>
                                 <tr>
-                                    <th data-en="Type" data-ar="Ø§Ù„Ù†ÙˆØ¹">Type</th>
-                                    <th data-en="Details" data-ar="Ø§Ù„ØªÙØ§ØµÙŠÙ„">Details</th>
-                                    <th data-en="Entry/Exit Time" data-ar="ÙˆÙ‚Øª Ø§Ù„Ø¯Ø®ÙˆÙ„/Ø§Ù„Ø®Ø±ÙˆØ¬">Entry/Exit Time</th>
-                                    <th data-en="Status" data-ar="Ø§Ù„Ø­Ø§Ù„Ø©">Status</th>
-                                    <th data-en="User" data-ar="Ø§Ù„Ù…Ø³ØªØ®Ø¯Ù…">User</th>
+                                    <th data-en="Type" data-ar="النوع">Type</th>
+                                    <th data-en="Details" data-ar="التفاصيل">Details</th>
+                                    <th data-en="Entry/Exit Time" data-ar="وقت الدخول/الخروج">Entry/Exit Time</th>
+                                    <th data-en="Status" data-ar="الحالة">Status</th>
+                                    <th data-en="User" data-ar="المستخدم">User</th>
                                 </tr>
                             </thead>
                             <tbody id="historyTable"></tbody>
                         </table>
                     </div>
-                    <button onclick="printHistory()" class="btn btn-secondary" style="margin-top: 20px; width: auto;" data-en="Print Report" data-ar="Ø·Ø¨Ø§Ø¹Ø© Ø§Ù„ØªÙ‚Ø±ÙŠØ±">Print Report</button>
+                    <button onclick="printHistory()" class="btn btn-secondary" style="margin-top: 20px; width: auto;" data-en="Print Report" data-ar="طباعة التقرير">Print Report</button>
                 </div>
             </div>
 
             <!-- Users Section (Admin Only) -->
             <div id="usersSection" class="section hidden">
                 <div class="card">
-                    <h2 data-en="Add New User" data-ar="Ø¥Ø¶Ø§ÙØ© Ù…Ø³ØªØ®Ø¯Ù… Ø¬Ø¯ÙŠØ¯">Add New User</h2>
+                    <h2 data-en="Add New User" data-ar="إضافة مستخدم جديد">Add New User</h2>
                     <form id="addUserForm">
                         <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px;">
                             <div class="form-group">
-                                <label data-en="Email *" data-ar="Ø§Ù„Ø¨Ø±ÙŠØ¯ Ø§Ù„Ø¥Ù„ÙƒØªØ±ÙˆÙ†ÙŠ *">Email *</label>
+                                <label data-en="Email *" data-ar="البريد الإلكتروني *">Email *</label>
                                 <input type="email" id="newUserEmail" required>
                             </div>
                             <div class="form-group">
-                                <label data-en="Password *" data-ar="ÙƒÙ„Ù…Ø© Ø§Ù„Ù…Ø±ÙˆØ± *">Password *</label>
+                                <label data-en="Password *" data-ar="كلمة المرور *">Password *</label>
                                 <input type="password" id="newUserPassword" required minlength="6">
                             </div>
                             <div class="form-group">
-                                <label data-en="Role" data-ar="Ø§Ù„Ø¯ÙˆØ±">Role</label>
+                                <label data-en="Role" data-ar="الدور">Role</label>
                                 <select id="newUserRole">
-                                    <option value="user" data-en="User" data-ar="Ù…Ø³ØªØ®Ø¯Ù…">User</option>
-                                    <option value="admin" data-en="Admin" data-ar="Ø£Ø¯Ù…Ù†">Admin</option>
+                                    <option value="user" data-en="User" data-ar="مستخدم">User</option>
+                                    <option value="admin" data-en="Admin" data-ar="أدمن">Admin</option>
                                 </select>
                             </div>
                         </div>
-                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Add User" data-ar="Ø¥Ø¶Ø§ÙØ© Ù…Ø³ØªØ®Ø¯Ù…">Add User</button>
+                        <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Add User" data-ar="إضافة مستخدم">Add User</button>
                     </form>
                 </div>
 
                 <div class="card">
-                    <h2 data-en="System Users" data-ar="Ù…Ø³ØªØ®Ø¯Ù…ÙŠÙ† Ø§Ù„Ù†Ø¸Ø§Ù…">System Users</h2>
+                    <h2 data-en="System Users" data-ar="مستخدمين النظام">System Users</h2>
                     <div class="table-container">
                         <table>
                             <thead>
                                 <tr>
-                                    <th data-en="Email" data-ar="Ø§Ù„Ø¨Ø±ÙŠØ¯">Email</th>
-                                    <th data-en="Role" data-ar="Ø§Ù„Ø¯ÙˆØ±">Role</th>
-                                    <th data-en="Created" data-ar="ØªØ§Ø±ÙŠØ® Ø§Ù„Ø¥Ù†Ø´Ø§Ø¡">Created</th>
-                                    <th data-en="Actions" data-ar="Ø¥Ø¬Ø±Ø§Ø¡Ø§Øª">Actions</th>
+                                    <th data-en="Email" data-ar="البريد">Email</th>
+                                    <th data-en="Role" data-ar="الدور">Role</th>
+                                    <th data-en="Created" data-ar="تاريخ الإنشاء">Created</th>
+                                    <th data-en="Actions" data-ar="إجراءات">Actions</th>
                                 </tr>
                             </thead>
                             <tbody id="usersTable"></tbody>
@@ -438,7 +467,7 @@
     <div id="editModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 data-en="Edit Entry" data-ar="ØªØ¹Ø¯ÙŠÙ„">Edit Entry</h3>
+                <h3 data-en="Edit Entry" data-ar="تعديل">Edit Entry</h3>
                 <button class="close-modal" onclick="closeEditModal()">&times;</button>
             </div>
             <form id="editForm">
@@ -446,7 +475,7 @@
                 <input type="hidden" id="editType">
                 <input type="hidden" id="editFirestoreId">
                 <div id="editFields"></div>
-                <button type="submit" class="btn btn-success" style="margin-top: 20px;" data-en="Save Changes" data-ar="Ø­ÙØ¸ Ø§Ù„ØªØºÙŠÙŠØ±Ø§Øª">Save Changes</button>
+                <button type="submit" class="btn btn-success" style="margin-top: 20px;" data-en="Save Changes" data-ar="حفظ التغييرات">Save Changes</button>
             </form>
         </div>
     </div>
@@ -455,21 +484,25 @@
     <div id="companyModal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3 data-en="Add New Company" data-ar="Ø¥Ø¶Ø§ÙØ© Ø´Ø±ÙƒØ© Ø¬Ø¯ÙŠØ¯Ø©">Add New Company</h3>
+                <h3 data-en="Add New Company" data-ar="إضافة شركة جديدة">Add New Company</h3>
                 <button class="close-modal" onclick="closeCompanyModal()">&times;</button>
             </div>
             <form id="addCompanyForm">
                 <input type="hidden" id="companyType">
                 <div class="form-group">
-                    <label data-en="Company Name" data-ar="Ø§Ø³Ù… Ø§Ù„Ø´Ø±ÙƒØ©">Company Name</label>
+                    <label data-en="Company Name" data-ar="اسم الشركة">Company Name</label>
                     <input type="text" id="newCompanyName" required>
                 </div>
-                <button type="submit" class="btn btn-success" data-en="Add" data-ar="Ø¥Ø¶Ø§ÙØ©">Add</button>
+                <button type="submit" class="btn btn-success" data-en="Add" data-ar="إضافة">Add</button>
             </form>
         </div>
     </div>
 
     <script>
+'''
+
+# إضافة الجزء الثاني - JavaScript
+js_part = '''
         // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyBVho_BuuRkfRbuQzW2PWDYnJxxmC5yyAc",
@@ -491,13 +524,20 @@
         let isAdmin = false;
         let currentLang = 'en';
         let isOnline = navigator.onLine;
+        let currentDay = null; // لتتبع تغيير اليوم
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
             initStorage();
             setupEventListeners();
             setupNetworkListeners();
-            setDefaultTimes();
+            
+            // بدء تحديث الساعة في الهيدر
+            updateHeaderDateTime();
+            setInterval(updateHeaderDateTime, 1000);
+            
+            // مراقبة تغيير اليوم
+            setInterval(checkDayChange, 60000); // كل دقيقة
             
             // Check auth state
             auth.onAuthStateChanged(async (user) => {
@@ -510,6 +550,54 @@
                 }
             });
         });
+
+        // تحديث التاريخ والوقت في الهيدر
+        function updateHeaderDateTime() {
+            const now = new Date();
+            const dateStr = formatDateDDMMYYYY(now);
+            const timeStr = formatTimeFull(now);
+            
+            document.getElementById('headerDate').textContent = dateStr;
+            document.getElementById('headerTime').textContent = timeStr;
+        }
+
+        // تنسيق التاريخ DD/MM/YYYY
+        function formatDateDDMMYYYY(date) {
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const year = date.getFullYear();
+            return `${day}/${month}/${year}`;
+        }
+
+        // تنسيق الوقت الكامل
+        function formatTimeFull(date) {
+            return date.toLocaleTimeString(currentLang === 'ar' ? 'ar-SA' : 'en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: false
+            });
+        }
+
+        // التحقق من تغيير اليوم (نظام اليومية 24 ساعة)
+        function checkDayChange() {
+            const now = new Date();
+            const today = formatDateDDMMYYYY(now);
+            
+            if (currentDay && currentDay !== today) {
+                // يوم جديد - إعادة تعيين العدادات أو تحميل بيانات اليوم الجديد
+                currentDay = today;
+                loadAllTables();
+                updateStats();
+            } else if (!currentDay) {
+                currentDay = today;
+            }
+        }
+
+        // الحصول على الوقت الحالي تلقائياً
+        function getCurrentDateTime() {
+            return new Date().toISOString();
+        }
 
         function initStorage() {
             const keys = ['gms_visits', 'gms_fnq', 'gms_fcp', 'gms_companies_fnq', 'gms_users', 'gms_pending_sync'];
@@ -632,7 +720,8 @@
                 synced: false,
                 createdBy: currentUser.email,
                 createdByUid: currentUser.uid,
-                createdAt: new Date().toISOString()
+                createdAt: new Date().toISOString(),
+                dateKey: formatDateDDMMYYYY(new Date()) // إضافة مفتاح التاريخ
             };
             
             const localData = JSON.parse(localStorage.getItem('gms_' + type));
@@ -759,50 +848,57 @@
             
             document.getElementById('visitForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                // الوقت التلقائي من الجهاز
+                const entryTime = getCurrentDateTime();
+                
                 await saveEntry('visits', {
                     driver: document.getElementById('visitDriver').value,
                     company: document.getElementById('visitCompany').value,
                     vehicle: document.getElementById('visitVehicle').value,
                     destination: document.getElementById('visitDestination').value,
-                    entryTime: document.getElementById('visitEntryTime').value,
+                    entryTime: entryTime,
                     exitTime: null, status: 'in'
                 });
                 document.getElementById('visitForm').reset();
-                setDefaultTimes();
                 loadVisitsTable();
+                updateStats();
                 alert('Saved!');
             });
 
             document.getElementById('fnqForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                // الوقت التلقائي من الجهاز
+                const entryTime = getCurrentDateTime();
                 const gp = document.getElementById('fnqGP').value || '';
                 
                 await saveEntry('fnq', {
                     vehicle: document.getElementById('fnqVehicle').value,
                     company: document.getElementById('fnqCompany').value,
                     gatePass: gp,
-                    entryTime: document.getElementById('fnqEntryTime').value,
+                    entryTime: entryTime,
                     exitTime: null, status: 'in'
                 });
                 document.getElementById('fnqForm').reset();
-                setDefaultTimes();
                 loadFNQTable();
+                updateStats();
                 alert('Saved!');
             });
 
             document.getElementById('fcpForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
+                // الوقت التلقائي من الجهاز
+                const exitTime = getCurrentDateTime();
                 const gp = document.getElementById('fcpGP').value || '';
                 
                 await saveEntry('fcp', {
                     vehicle: document.getElementById('fcpVehicle').value,
                     gatePass: gp,
-                    exitTime: document.getElementById('fcpExitTime').value,
+                    exitTime: exitTime,
                     status: 'out'
                 });
                 document.getElementById('fcpForm').reset();
-                setDefaultTimes();
                 loadFCPTable();
+                updateStats();
                 alert('Saved!');
             });
 
@@ -878,9 +974,11 @@
 
         window.checkoutEntry = async function(type, id) {
             if (!confirm('Confirm checkout?')) return;
-            const updates = { status: 'out', exitTime: new Date().toISOString(), exitedBy: currentUser.email };
+            const exitTime = getCurrentDateTime();
+            const updates = { status: 'out', exitTime: exitTime, exitedBy: currentUser.email };
             await updateEntry(type, id, updates);
             loadAllTables();
+            updateStats();
             alert('Checked out!');
         };
 
@@ -933,6 +1031,11 @@
         // Table Loading
         function loadVisitsTable() {
             let visits = JSON.parse(localStorage.getItem('gms_visits'));
+            const today = formatDateDDMMYYYY(new Date());
+            
+            // تصفية حسب اليوم الحالي فقط (نظام اليومية)
+            visits = visits.filter(v => v.dateKey === today || isToday(v.createdAt));
+            
             if (!isAdmin) {
                 visits = visits.filter(v => v.createdByUid === currentUser.uid);
             }
@@ -945,7 +1048,7 @@
                     <td>${v.company}</td>
                     <td>${v.vehicle}</td>
                     <td>${v.destination}</td>
-                    <td>${formatDateTime(v.entryTime)} ${!v.synced ? '<span class="sync-pending">âŒ›</span>' : ''}</td>
+                    <td><span class="record-datetime">${formatDateTime(v.entryTime)}</span> ${!v.synced ? '<span class="sync-pending">⌛</span>' : ''}</td>
                     <td class="action-btns">
                         <button onclick="editEntry('visits', ${v.id})" class="btn-small btn-warning">Edit</button>
                         <button onclick="checkoutEntry('visits', ${v.id})" class="btn-small btn-danger">Out</button>
@@ -954,26 +1057,124 @@
             `).join('');
         }
 
+        function loadFNQTable() {
+            let fnq = JSON.parse(localStorage.getItem('gms_fnq'));
+            const today = formatDateDDMMYYYY(new Date());
+            
+            // تصفية حسب اليوم الحالي فقط (نظام اليومية)
+            fnq = fnq.filter(f => f.dateKey === today || isToday(f.createdAt));
+            
+            if (!isAdmin) {
+                fnq = fnq.filter(f => f.createdByUid === currentUser.uid);
+            }
+            const active = fnq.filter(f => f.status === 'in');
+            const tbody = document.getElementById('fnqTable');
+            
+            tbody.innerHTML = active.map(f => `
+                <tr>
+                    <td>${f.vehicle}</td>
+                    <td>${f.company}</td>
+                    <td>${f.gatePass || '-'}</td>
+                    <td><span class="record-datetime">${formatDateTime(f.entryTime)}</span> ${!f.synced ? '<span class="sync-pending">⌛</span>' : ''}</td>
+                    <td class="action-btns">
+                        <button onclick="editEntry('fnq', ${f.id})" class="btn-small btn-warning">Edit</button>
+                        <button onclick="checkoutEntry('fnq', ${f.id})" class="btn-small btn-danger">Out</button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function loadFCPTable() {
+            let fcp = JSON.parse(localStorage.getItem('gms_fcp'));
+            const today = formatDateDDMMYYYY(new Date());
+            
+            // عرض كل العربيات اللي خرجت النهاردة فقط
+            fcp = fcp.filter(f => f.dateKey === today || isToday(f.createdAt));
+            
+            if (!isAdmin) {
+                fcp = fcp.filter(f => f.createdByUid === currentUser.uid);
+            }
+            
+            // ترتيب حسب وقت الخروج (الأحدث أولاً)
+            fcp.sort((a, b) => new Date(b.exitTime) - new Date(a.exitTime));
+            
+            const tbody = document.getElementById('fcpTable');
+            
+            tbody.innerHTML = fcp.map(f => `
+                <tr>
+                    <td>${f.vehicle}</td>
+                    <td>${f.gatePass || '-'}</td>
+                    <td><span class="record-datetime">${formatDateTime(f.exitTime)}</span> ${!f.synced ? '<span class="sync-pending">⌛</span>' : ''}</td>
+                    <td><span class="status-out">OUT</span></td>
+                </tr>
+            `).join('');
+        }
+
         function loadAllTables() {
             loadVisitsTable();
             loadFNQTable();
             loadFCPTable();
+            updateStats();
+        }
+
+        // التحقق مما إذا كان التاريخ هو اليوم الحالي
+        function isToday(dateString) {
+            if (!dateString) return false;
+            const date = new Date(dateString);
+            const today = new Date();
+            return date.getDate() === today.getDate() && 
+                   date.getMonth() === today.getMonth() && 
+                   date.getFullYear() === today.getFullYear();
+        }
+
+        // تحديث الإحصائيات
+        function updateStats() {
+            const today = formatDateDDMMYYYY(new Date());
+            
+            let visits = JSON.parse(localStorage.getItem('gms_visits'));
+            let fnq = JSON.parse(localStorage.getItem('gms_fnq'));
+            let fcp = JSON.parse(localStorage.getItem('gms_fcp'));
+            
+            // تصفية حسب اليوم الحالي
+            visits = visits.filter(v => v.dateKey === today || isToday(v.createdAt));
+            fnq = fnq.filter(f => f.dateKey === today || isToday(f.createdAt));
+            fcp = fcp.filter(f => f.dateKey === today || isToday(f.createdAt));
+            
+            if (!isAdmin) {
+                visits = visits.filter(v => v.createdByUid === currentUser.uid);
+                fnq = fnq.filter(f => f.createdByUid === currentUser.uid);
+                fcp = fcp.filter(f => f.createdByUid === currentUser.uid);
+            }
+            
+            const todayEntries = visits.length + fnq.length;
+            const currentlyInside = visits.filter(v => v.status === 'in').length + fnq.filter(f => f.status === 'in').length;
+            const exitedToday = visits.filter(v => v.status === 'out').length + fnq.filter(f => f.status === 'out').length + fcp.length;
+            
+            document.getElementById('statToday').textContent = todayEntries;
+            document.getElementById('statInside').textContent = currentlyInside;
+            document.getElementById('statExited').textContent = exitedToday;
         }
 
         function loadHistory() {
             const filter = document.getElementById('historyFilter').value;
             let allEntries = [];
+            const today = formatDateDDMMYYYY(new Date());
             
             const types = ['visits', 'fnq', 'fcp'];
             types.forEach(type => {
                 if (filter !== 'all' && filter !== type) return;
                 let data = JSON.parse(localStorage.getItem('gms_' + type));
+                
+                // تصفية حسب اليوم الحالي فقط
+                data = data.filter(d => d.dateKey === today || isToday(d.createdAt));
+                
                 if (!isAdmin) {
                     data = data.filter(d => d.createdByUid === currentUser.uid);
                 }
                 data.forEach(d => allEntries.push({...d, type}));
             });
             
+            // ترتيب حسب الوقت (الأحدث أولاً)
             allEntries.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
             const tbody = document.getElementById('historyTable');
@@ -984,7 +1185,7 @@
                     <tr>
                         <td>${e.type.toUpperCase()}</td>
                         <td>${details}</td>
-                        <td>${formatDateTime(time)}</td>
+                        <td><span class="record-datetime">${formatDateTime(time)}</span></td>
                         <td class="${e.status === 'in' ? 'status-in' : 'status-out'}">${e.status.toUpperCase()}</td>
                         <td>${e.createdBy}</td>
                     </tr>
@@ -1018,24 +1219,23 @@
             const companies = JSON.parse(localStorage.getItem('gms_companies_fnq'));
             const select = document.getElementById('fnqCompany');
             const currentValue = select.value;
-            select.innerHTML = '<option value="">Select / Ø§Ø®ØªØ±</option>';
+            select.innerHTML = '<option value="">Select / اختر</option>';
             companies.forEach(c => {
                 select.innerHTML += `<option value="${c}">${c}</option>`;
             });
             select.value = currentValue;
         }
 
-        function setDefaultTimes() {
-            const now = new Date();
-            const formatted = now.toISOString().slice(0, 16);
-            document.getElementById('visitEntryTime').value = formatted;
-            document.getElementById('fnqEntryTime').value = formatted;
-            document.getElementById('fcpExitTime').value = formatted;
-        }
-
         function formatDateTime(isoString) {
             if (!isoString) return '-';
-            return new Date(isoString).toLocaleString(currentLang === 'ar' ? 'ar-SA' : 'en-US');
+            const date = new Date(isoString);
+            const dateStr = formatDateDDMMYYYY(date);
+            const timeStr = date.toLocaleTimeString(currentLang === 'ar' ? 'ar-SA' : 'en-US', {
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+            return `${dateStr} ${timeStr}`;
         }
 
         window.editEntry = function(type, id) {
@@ -1054,14 +1254,14 @@
                     <div class="form-group"><label>Company</label><input type="text" id="editCompany" value="${entry.company}" required></div>
                     <div class="form-group"><label>Vehicle</label><input type="text" id="editVehicle" value="${entry.vehicle}" required></div>
                     <div class="form-group"><label>Destination</label><input type="text" id="editDestination" value="${entry.destination}" required></div>
-                    <div class="form-group"><label>Entry Time</label><input type="datetime-local" id="editEntryTime" value="${entry.entryTime}" required></div>
+                    <div class="form-group"><label>Entry Time</label><input type="text" id="editEntryTime" value="${formatDateTime(entry.entryTime)}" class="time-field" readonly></div>
                 `;
             } else {
                 fieldsHtml = `
                     <div class="form-group"><label>Vehicle</label><input type="text" id="editVehicle" value="${entry.vehicle}" required></div>
                     <div class="form-group"><label>Company</label><input type="text" id="editCompany" value="${entry.company}" required></div>
                     <div class="form-group"><label>Gate Pass</label><input type="text" id="editGP" value="${entry.gatePass || ''}"></div>
-                    <div class="form-group"><label>Entry Time</label><input type="datetime-local" id="editEntryTime" value="${entry.entryTime}" required></div>
+                    <div class="form-group"><label>Entry Time</label><input type="text" id="editEntryTime" value="${formatDateTime(entry.entryTime)}" class="time-field" readonly></div>
                 `;
             }
             document.getElementById('editFields').innerHTML = fieldsHtml;
@@ -1069,4 +1269,4 @@
         };
     </script>
 </body>
-</html>'''
+</html>
