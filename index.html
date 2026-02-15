@@ -1,44 +1,123 @@
- <!DOCTYPE html>
-<html lang="en">
+
+   <!DOCTYPE html>
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gate Management System</title>
-    
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    <title>نظام إدارة البوابة</title>
     
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
         body { background: #f0f2f5; }
         
-        .login-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-        
         .login-box {
-            background: white;
-            padding: 40px;
-            border-radius: 10px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-            width: 90%;
             max-width: 400px;
-        }
-        
-        .login-box h1 {
+            margin: 100px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
             text-align: center;
-            margin-bottom: 30px;
-            color: #333;
-            font-size: 24px;
         }
         
-        .form-group {
+        .login-box h1 { margin-bottom: 20px; color: #333; }
+        
+        .login-box input {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 18px;
+            text-align: center;
+        }
+        
+        .login-box button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 18px;
+            cursor: pointer;
+        }
+        
+        .login-box button:hover { background: #45a049; }
+        
+        .hidden { display: none !important; }
+        
+        .header {
+            background: #2c3e50;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            position: sticky;
+            top: 0;
+        }
+        
+        .datetime {
+            background: rgba(255,255,255,0.2);
+            display: inline-block;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 10px;
+        }
+        
+        .datetime .date { font-size: 20px; font-weight: bold; }
+        .datetime .time { font-size: 16px; }
+        
+        .container {
+            max-width: 1000px;
+            margin: 20px auto;
+            padding: 0 15px;
+        }
+        
+        .tabs {
+            display: flex;
+            gap: 10px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .tab {
+            flex: 1;
+            min-width: 100px;
+            padding: 15px;
+            background: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .tab.active {
+            background: #3498db;
+            color: white;
+        }
+        
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card h2 {
+            margin-bottom: 15px;
+            color: #2c3e50;
+            border-bottom: 2px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
         }
         
         .form-group label {
@@ -48,8 +127,7 @@
             color: #555;
         }
         
-        .form-group input,
-        .form-group select {
+        .form-group input, .form-group select {
             width: 100%;
             padding: 12px;
             border: 2px solid #ddd;
@@ -57,122 +135,17 @@
             font-size: 16px;
         }
         
-        .form-group input:focus {
-            outline: none;
-            border-color: #667eea;
-        }
-        
-        .btn {
-            width: 100%;
-            padding: 12px;
-            background: #667eea;
+        .btn-save {
+            background: #27ae60;
             color: white;
+            padding: 12px 30px;
             border: none;
             border-radius: 5px;
             font-size: 16px;
-            font-weight: bold;
             cursor: pointer;
-            margin-top: 10px;
         }
         
-        .btn:hover {
-            background: #5568d3;
-        }
-        
-        .btn-secondary {
-            background: #48bb78;
-            margin-top: 15px;
-        }
-        
-        .btn-secondary:hover {
-            background: #38a169;
-        }
-        
-        .error-message {
-            color: #e53e3e;
-            text-align: center;
-            margin-top: 10px;
-            font-size: 14px;
-        }
-        
-        .hidden {
-            display: none !important;
-        }
-        
-        /* Dashboard Styles */
-        .dashboard {
-            padding: 20px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-        
-        .header {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        
-        .datetime-box {
-            background: #667eea;
-            color: white;
-            padding: 10px 20px;
-            border-radius: 8px;
-            text-align: center;
-        }
-        
-        .datetime-box .date {
-            font-size: 18px;
-            font-weight: bold;
-        }
-        
-        .datetime-box .time {
-            font-size: 14px;
-            opacity: 0.9;
-        }
-        
-        .nav-tabs {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-        
-        .nav-tab {
-            padding: 10px 20px;
-            background: white;
-            border: 2px solid #ddd;
-            border-radius: 5px;
-            cursor: pointer;
-            font-weight: bold;
-        }
-        
-        .nav-tab.active {
-            background: #667eea;
-            color: white;
-            border-color: #667eea;
-        }
-        
-        .card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            margin-bottom: 20px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
-        
-        .card h2 {
-            margin-bottom: 20px;
-            color: #333;
-            border-bottom: 2px solid #eee;
-            padding-bottom: 10px;
-        }
+        .btn-save:hover { background: #229954; }
         
         table {
             width: 100%;
@@ -182,342 +155,274 @@
         
         th, td {
             padding: 12px;
-            text-align: left;
-            border-bottom: 1px solid #eee;
+            text-align: right;
+            border-bottom: 1px solid #ddd;
         }
         
         th {
-            background: #667eea;
+            background: #34495e;
             color: white;
-            font-weight: bold;
         }
         
-        .btn-small {
+        .time-box {
+            background: #ecf0f1;
             padding: 5px 10px;
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .btn-action {
+            padding: 5px 15px;
             margin: 2px;
             border: none;
             border-radius: 3px;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 14px;
         }
         
-        .btn-edit {
-            background: #f6ad55;
-            color: white;
-        }
+        .btn-out { background: #e74c3c; color: white; }
+        .btn-edit { background: #f39c12; color: white; }
         
-        .btn-out {
-            background: #f56565;
-            color: white;
-        }
+        .section { display: none; }
+        .section.active { display: block; }
         
-        .status-in {
-            color: #48bb78;
-            font-weight: bold;
-        }
-        
-        .status-out {
-            color: #f56565;
-            font-weight: bold;
-        }
-        
-        .record-time {
-            background: #edf2f7;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 12px;
-        }
-        
-        .stats-grid {
+        .stats {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 20px;
         }
         
-        .stat-card {
+        .stat-box {
             background: white;
             padding: 20px;
             border-radius: 10px;
             text-align: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
         
         .stat-number {
             font-size: 36px;
             font-weight: bold;
-            color: #667eea;
+            color: #3498db;
         }
         
-        .stat-label {
-            color: #718096;
-            margin-top: 5px;
-        }
+        .stat-label { color: #7f8c8d; margin-top: 5px; }
         
         .logout-btn {
-            background: #f56565;
+            position: absolute;
+            left: 20px;
+            top: 20px;
+            background: #e74c3c;
             color: white;
-            padding: 8px 16px;
+            padding: 10px 20px;
             border: none;
             border-radius: 5px;
             cursor: pointer;
         }
         
-        .section {
-            display: none;
-        }
-        
-        .section.active {
-            display: block;
-        }
-        
-        .form-row {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-        }
-        
-        .btn-success {
-            background: #48bb78;
-            width: auto;
-            padding: 12px 30px;
-            margin-top: 15px;
-        }
-        
-        .btn-success:hover {
-            background: #38a169;
+        @media (max-width: 768px) {
+            .stats { grid-template-columns: 1fr; }
+            .form-row { grid-template-columns: 1fr; }
         }
     </style>
 </head>
 <body>
 
-    <!-- Login Page -->
-    <div id="loginPage" class="login-container">
+    <!-- صفحة تسجيل الدخول البسيطة -->
+    <div id="loginPage">
         <div class="login-box">
-            <h1>Gate Management System</h1>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Email / البريد الإلكتروني</label>
-                    <input type="email" id="email" required placeholder="Enter your email">
-                </div>
-                <div class="form-group">
-                    <label>Password / كلمة المرور</label>
-                    <input type="password" id="password" required placeholder="Enter your password">
-                </div>
-                <button type="submit" class="btn">Login / تسجيل الدخول</button>
-            </form>
-            <div id="loginError" class="error-message"></div>
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid #eee;">
-            <button onclick="showSetup()" class="btn btn-secondary">Create Admin Account / إنشاء حساب أدمن</button>
+            <h1>🔐 تسجيل الدخول</h1>
+            <p style="margin-bottom: 20px; color: #666;">أدخل اسمك للدخول للنظام</p>
+            <input type="text" id="username" placeholder="أدخل اسمك" required>
+            <button onclick="login()">دخول</button>
         </div>
     </div>
 
-    <!-- Setup Modal -->
-    <div id="setupModal" class="login-container hidden" style="position: fixed; top: 0; left: 0; z-index: 1000;">
-        <div class="login-box">
-            <h1>Create Admin Account</h1>
-            <form id="setupForm">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="setupEmail" required>
-                </div>
-                <div class="form-group">
-                    <label>Password (6+ chars)</label>
-                    <input type="password" id="setupPassword" required minlength="6">
-                </div>
-                <div class="form-group">
-                    <label>Confirm Password</label>
-                    <input type="password" id="setupConfirm" required>
-                </div>
-                <button type="submit" class="btn">Create Account</button>
-                <button type="button" onclick="hideSetup()" class="btn btn-secondary" style="margin-top: 10px;">Back</button>
-            </form>
-            <div id="setupError" class="error-message"></div>
-        </div>
-    </div>
-
-    <!-- Dashboard -->
-    <div id="dashboard" class="dashboard hidden">
+    <!-- لوحة التحكم -->
+    <div id="dashboard" class="hidden">
         <div class="header">
-            <h1>Gate Management System</h1>
-            <div class="datetime-box">
+            <button onclick="logout()" class="logout-btn">خروج</button>
+            <h1>نظام إدارة البوابة</h1>
+            <div class="datetime">
                 <div class="date" id="currentDate">--/--/----</div>
                 <div class="time" id="currentTime">--:--:--</div>
             </div>
-            <div>
-                <span id="userEmail" style="margin-right: 15px;"></span>
-                <button onclick="logout()" class="logout-btn">Logout</button>
-            </div>
+            <div style="margin-top: 10px;">المستخدم: <span id="userName"></span></div>
         </div>
 
-        <div class="stats-grid">
-            <div class="stat-card">
-                <div class="stat-number" id="statToday">0</div>
-                <div class="stat-label">Today's Entries</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="statInside">0</div>
-                <div class="stat-label">Currently Inside</div>
-            </div>
-            <div class="stat-card">
-                <div class="stat-number" id="statExited">0</div>
-                <div class="stat-label">Exited Today</div>
-            </div>
-        </div>
-
-        <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showTab('visits')">Visits</button>
-            <button class="nav-tab" onclick="showTab('fnq')">FNQ</button>
-            <button class="nav-tab" onclick="showTab('fcp')">FCP</button>
-            <button class="nav-tab" onclick="showTab('history')">History</button>
-        </div>
-
-        <!-- Visits Tab -->
-        <div id="visitsTab" class="section active">
-            <div class="card">
-                <h2>New Visit Entry</h2>
-                <form id="visitForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Driver Name</label>
-                            <input type="text" id="visitDriver" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Company</label>
-                            <input type="text" id="visitCompany" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Vehicle Number</label>
-                            <input type="text" id="visitVehicle" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Destination</label>
-                            <select id="visitDestination" required>
-                                <option value="">Select</option>
-                                <option value="FNQ">FNQ</option>
-                                <option value="FCP">FCP</option>
-                                <option value="OMAG">OMAG</option>
-                                <option value="FRIMA">FRIMA</option>
-                                <option value="ZENITH">ZENITH</option>
-                                <option value="K.STONE">K.STONE</option>
-                                <option value="RINO">RINO</option>
-                                <option value="WORK SHOP">WORK SHOP</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success">Save Entry</button>
-                </form>
+        <div class="container">
+            <!-- إحصائيات -->
+            <div class="stats">
+                <div class="stat-box">
+                    <div class="stat-number" id="statEntries">0</div>
+                    <div class="stat-label">المدخلات اليوم</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="statInside">0</div>
+                    <div class="stat-label">بداخل الآن</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-number" id="statExited">0</div>
+                    <div class="stat-label">الخارجون اليوم</div>
+                </div>
             </div>
 
-            <div class="card">
-                <h2>Active Visits</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Driver</th>
-                            <th>Company</th>
-                            <th>Vehicle</th>
-                            <th>Destination</th>
-                            <th>Entry Time</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="visitsTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- FNQ Tab -->
-        <div id="fnqTab" class="section">
-            <div class="card">
-                <h2>FNQ Entry</h2>
-                <form id="fnqForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Vehicle Number</label>
-                            <input type="text" id="fnqVehicle" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Company</label>
-                            <input type="text" id="fnqCompany" required>
-                        </div>
-                        <div class="form-group">
-                            <label>Gate Pass (Optional)</label>
-                            <input type="text" id="fnqGP" placeholder="Empty">
-                        </div>
-                    </div>
-                    <button type="submit" class="btn btn-success">Save Entry</button>
-                </form>
+            <!-- التبويبات -->
+            <div class="tabs">
+                <button class="tab active" onclick="showTab('visits')">الزيارات</button>
+                <button class="tab" onclick="showTab('fnq')">FNQ</button>
+                <button class="tab" onclick="showTab('fcp')">FCP</button>
+                <button class="tab" onclick="showTab('history')">السجل</button>
             </div>
 
-            <div class="card">
-                <h2>Active FNQ</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Vehicle</th>
-                            <th>Company</th>
-                            <th>Gate Pass</th>
-                            <th>Entry Time</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                    <tbody id="fnqTable"></tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- FCP Tab -->
-        <div id="fcpTab" class="section">
-            <div class="card">
-                <h2>FCP Exit</h2>
-                <form id="fcpForm">
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Vehicle Number</label>
-                            <input type="text" id="fcpVehicle" required>
+            <!-- قسم الزيارات -->
+            <div id="visitsSection" class="section active">
+                <div class="card">
+                    <h2>تسجيل زيارة جديدة</h2>
+                    <form id="visitForm" onsubmit="saveVisit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>اسم السائق</label>
+                                <input type="text" id="visitDriver" required>
+                            </div>
+                            <div class="form-group">
+                                <label>الشركة</label>
+                                <input type="text" id="visitCompany" required>
+                            </div>
+                            <div class="form-group">
+                                <label>رقم السيارة</label>
+                                <input type="text" id="visitVehicle" required>
+                            </div>
+                            <div class="form-group">
+                                <label>الوجهة</label>
+                                <select id="visitDestination" required>
+                                    <option value="">اختر</option>
+                                    <option value="FNQ">FNQ</option>
+                                    <option value="FCP">FCP</option>
+                                    <option value="OMAG">OMAG</option>
+                                    <option value="FRIMA">FRIMA</option>
+                                    <option value="ZENITH">ZENITH</option>
+                                    <option value="K.STONE">K.STONE</option>
+                                    <option value="RINO">RINO</option>
+                                    <option value="WORK SHOP">WORK SHOP</option>
+                                </select>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label>Gate Pass (Optional)</label>
-                            <input type="text" id="fcpGP" placeholder="Empty">
+                        <button type="submit" class="btn-save">حفظ</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>الزيارات النشطة</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>السائق</th>
+                                <th>الشركة</th>
+                                <th>السيارة</th>
+                                <th>الوجهة</th>
+                                <th>وقت الدخول</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="visitsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- قسم FNQ -->
+            <div id="fnqSection" class="section">
+                <div class="card">
+                    <h2>تسجيل FNQ</h2>
+                    <form id="fnqForm" onsubmit="saveFNQ(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>رقم السيارة</label>
+                                <input type="text" id="fnqVehicle" required>
+                            </div>
+                            <div class="form-group">
+                                <label>الشركة</label>
+                                <input type="text" id="fnqCompany" required>
+                            </div>
+                            <div class="form-group">
+                                <label>رقم الجيت باس</label>
+                                <input type="text" id="fnqGP" placeholder="اختياري">
+                            </div>
                         </div>
-                    </div>
-                    <button type="submit" class="btn btn-success">Record Exit</button>
-                </form>
+                        <button type="submit" class="btn-save">حفظ</button>
+                    </form>
+                </div>
+
+                <div class="card">
+                    <h2>FNQ النشط</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>السيارة</th>
+                                <th>الشركة</th>
+                                <th>الجيت باس</th>
+                                <th>وقت الدخول</th>
+                                <th>إجراء</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fnqTable"></tbody>
+                    </table>
+                </div>
             </div>
 
-            <div class="card">
-                <h2>Today's FCP Exits (Newest First)</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Vehicle</th>
-                            <th>Gate Pass</th>
-                            <th>Exit Time</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="fcpTable"></tbody>
-                </table>
-            </div>
-        </div>
+            <!-- قسم FCP -->
+            <div id="fcpSection" class="section">
+                <div class="card">
+                    <h2>تسجيل خروج FCP</h2>
+                    <form id="fcpForm" onsubmit="saveFCP(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>رقم السيارة</label>
+                                <input type="text" id="fcpVehicle" required>
+                            </div>
+                            <div class="form-group">
+                                <label>رقم الجيت باس</label>
+                                <input type="text" id="fcpGP" placeholder="اختياري">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-save">تسجيل الخروج</button>
+                    </form>
+                </div>
 
-        <!-- History Tab -->
-        <div id="historyTab" class="section">
-            <div class="card">
-                <h2>Today's History</h2>
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Type</th>
-                            <th>Details</th>
-                            <th>Time</th>
-                            <th>Status</th>
-                        </tr>
-                    </thead>
-                    <tbody id="historyTable"></tbody>
-                </table>
+                <div class="card">
+                    <h2>خروج FCP اليوم (الأحدث أولاً)</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>السيارة</th>
+                                <th>الجيت باس</th>
+                                <th>وقت الخروج</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="fcpTable"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- قسم السجل -->
+            <div id="historySection" class="section">
+                <div class="card">
+                    <h2>سجل اليوم</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>النوع</th>
+                                <th>التفاصيل</th>
+                                <th>الوقت</th>
+                                <th>الحالة</th>
+                            </tr>
+                        </thead>
+                        <tbody id="historyTable"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -525,165 +430,31 @@
     <script>
 '''
 
-print(f"تم إنشاء الجزء الأول: {len(fixed_html)} حرف")
-        
-  إضافة JavaScript المبسط
-js_code ='''
-        // Firebase Config
-        const firebaseConfig = {
-            apiKey: "AIzaSyBVho_BuuRkfRbuQzW2PWDYnJxxmC5yyAc",
-            authDomain: "gate-management-system-44cf5.firebaseapp.com",
-            projectId: "gate-management-system-44cf5",
-            storageBucket: "gate-management-system-44cf5.appspot.com",
-            messagingSenderId: "859920522798",
-            appId: "1:859920522798:web:d3ea86a373ce25ab0dc9bf"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // Global Variables
+print(f"تم إنشاء HTML: {len(simple_html)} حرف")
+     
+# إضافة JavaScript بسيط جداً
+js_simple = '''
+        // متغيرات عامة
         let currentUser = null;
-
-        // Initialize App
+        
+        // تهيئة النظام
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('App loaded');
-            
-            // Setup login form
-            document.getElementById('loginForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                login();
-            });
-            
-            // Setup setup form
-            document.getElementById('setupForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                createAccount();
-            });
-            
-            // Setup visit form
-            document.getElementById('visitForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveVisit();
-            });
-            
-            // Setup FNQ form
-            document.getElementById('fnqForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveFNQ();
-            });
-            
-            // Setup FCP form
-            document.getElementById('fcpForm').addEventListener('submit', function(e) {
-                e.preventDefault();
-                saveFCP();
-            });
-            
-            // Check if user is logged in
-            auth.onAuthStateChanged(function(user) {
-                if (user) {
-                    currentUser = user;
-                    showDashboard();
-                } else {
-                    showLogin();
-                }
-            });
-            
-            // Update clock
             updateClock();
             setInterval(updateClock, 1000);
+            
+            // التحقق إذا كان المستخدم مسجل دخول
+            const savedUser = localStorage.getItem('gms_user');
+            if (savedUser) {
+                currentUser = savedUser;
+                showDashboard();
+            }
         });
 
-        function showLogin() {
-            document.getElementById('loginPage').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-        }
-
-        function showDashboard() {
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('userEmail').textContent = currentUser.email;
-            
-            loadAllData();
-        }
-
-        function showSetup() {
-            document.getElementById('setupModal').classList.remove('hidden');
-        }
-
-        function hideSetup() {
-            document.getElementById('setupModal').classList.add('hidden');
-            document.getElementById('setupError').textContent = '';
-        }
-
-        function login() {
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            console.log('Logging in:', email);
-            
-            auth.signInWithEmailAndPassword(email, password)
-                .then(function(userCredential) {
-                    console.log('Login successful');
-                    currentUser = userCredential.user;
-                    showDashboard();
-                })
-                .catch(function(error) {
-                    console.error('Login error:', error);
-                    document.getElementById('loginError').textContent = error.message;
-                });
-        }
-
-        function createAccount() {
-            const email = document.getElementById('setupEmail').value;
-            const password = document.getElementById('setupPassword').value;
-            const confirm = document.getElementById('setupConfirm').value;
-            
-            if (password !== confirm) {
-                document.getElementById('setupError').textContent = 'Passwords do not match!';
-                return;
-            }
-            
-            console.log('Creating account:', email);
-            
-            auth.createUserWithEmailAndPassword(email, password)
-                .then(function(userCredential) {
-                    console.log('Account created');
-                    const user = userCredential.user;
-                    
-                    // Save user data to Firestore
-                    return db.collection('users').doc(user.uid).set({
-                        email: email,
-                        role: 'admin',
-                        createdAt: new Date().toISOString()
-                    });
-                })
-                .then(function() {
-                    alert('Account created successfully! Please login.');
-                    hideSetup();
-                })
-                .catch(function(error) {
-                    console.error('Setup error:', error);
-                    document.getElementById('setupError').textContent = error.message;
-                });
-        }
-
-        function logout() {
-            auth.signOut().then(function() {
-                currentUser = null;
-                showLogin();
-            });
-        }
-
+        // تحديث الساعة
         function updateClock() {
             const now = new Date();
-            const dateStr = formatDate(now);
-            const timeStr = formatTime(now);
-            
-            document.getElementById('currentDate').textContent = dateStr;
-            document.getElementById('currentTime').textContent = timeStr;
+            document.getElementById('currentDate').textContent = formatDate(now);
+            document.getElementById('currentTime').textContent = formatTime(now);
         }
 
         function formatDate(date) {
@@ -694,7 +465,7 @@ js_code ='''
         }
 
         function formatTime(date) {
-            return date.toLocaleTimeString('en-US', { hour12: false });
+            return date.toLocaleTimeString('ar-EG', { hour12: false });
         }
 
         function formatDateTime(isoString) {
@@ -711,111 +482,144 @@ js_code ='''
                    date.getFullYear() === today.getFullYear();
         }
 
+        // تسجيل الدخول البسيط
+        function login() {
+            const username = document.getElementById('username').value.trim();
+            if (username) {
+                currentUser = username;
+                localStorage.setItem('gms_user', username);
+                showDashboard();
+            } else {
+                alert('الرجاء إدخال اسم');
+            }
+        }
+
+        // خروج
+        function logout() {
+            currentUser = null;
+            localStorage.removeItem('gms_user');
+            document.getElementById('loginPage').classList.remove('hidden');
+            document.getElementById('dashboard').classList.add('hidden');
+            document.getElementById('username').value = '';
+        }
+
+        // عرض لوحة التحكم
+        function showDashboard() {
+            document.getElementById('loginPage').classList.add('hidden');
+            document.getElementById('dashboard').classList.remove('hidden');
+            document.getElementById('userName').textContent = currentUser;
+            loadAllData();
+        }
+
+        // تبديل التبويبات
         function showTab(tabName) {
-            // Hide all sections
-            document.querySelectorAll('.section').forEach(function(section) {
+            // إخفاء كل الأقسام
+            document.querySelectorAll('.section').forEach(section => {
                 section.classList.remove('active');
             });
             
-            // Remove active from all tabs
-            document.querySelectorAll('.nav-tab').forEach(function(tab) {
+            // إزالة النشاط من كل التبويبات
+            document.querySelectorAll('.tab').forEach(tab => {
                 tab.classList.remove('active');
             });
             
-            // Show selected section
-            document.getElementById(tabName + 'Tab').classList.add('active');
+            // إظهار القسم المطلوب
+            document.getElementById(tabName + 'Section').classList.add('active');
             
-            // Add active to clicked tab
+            // تفعيل التبويب المضغوط
             event.target.classList.add('active');
             
-            // Load data if needed
             if (tabName === 'history') {
                 loadHistory();
             }
         }
 
-        function saveVisit() {
+        // حفظ بيانات الزيارة
+        function saveVisit(e) {
+            e.preventDefault();
+            
             const data = {
+                id: Date.now(),
                 driver: document.getElementById('visitDriver').value,
                 company: document.getElementById('visitCompany').value,
                 vehicle: document.getElementById('visitVehicle').value,
                 destination: document.getElementById('visitDestination').value,
                 entryTime: new Date().toISOString(),
                 status: 'in',
-                createdBy: currentUser.email,
-                createdByUid: currentUser.uid
+                user: currentUser
             };
             
-            db.collection('visits').add(data)
-                .then(function() {
-                    document.getElementById('visitForm').reset();
-                    loadAllData();
-                    alert('Entry saved!');
-                })
-                .catch(function(error) {
-                    alert('Error: ' + error.message);
-                });
+            let visits = JSON.parse(localStorage.getItem('gms_visits') || '[]');
+            visits.push(data);
+            localStorage.setItem('gms_visits', JSON.stringify(visits));
+            
+            document.getElementById('visitForm').reset();
+            loadAllData();
+            alert('تم الحفظ!');
         }
 
-        function saveFNQ() {
+        // حفظ FNQ
+        function saveFNQ(e) {
+            e.preventDefault();
+            
             const data = {
+                id: Date.now(),
                 vehicle: document.getElementById('fnqVehicle').value,
                 company: document.getElementById('fnqCompany').value,
                 gatePass: document.getElementById('fnqGP').value || '',
                 entryTime: new Date().toISOString(),
                 status: 'in',
-                createdBy: currentUser.email,
-                createdByUid: currentUser.uid
+                user: currentUser
             };
             
-            db.collection('fnq').add(data)
-                .then(function() {
-                    document.getElementById('fnqForm').reset();
-                    loadAllData();
-                    alert('Entry saved!');
-                })
-                .catch(function(error) {
-                    alert('Error: ' + error.message);
-                });
+            let fnq = JSON.parse(localStorage.getItem('gms_fnq') || '[]');
+            fnq.push(data);
+            localStorage.setItem('gms_fnq', JSON.stringify(fnq));
+            
+            document.getElementById('fnqForm').reset();
+            loadAllData();
+            alert('تم الحفظ!');
         }
 
-        function saveFCP() {
+        // حفظ FCP
+        function saveFCP(e) {
+            e.preventDefault();
+            
             const data = {
+                id: Date.now(),
                 vehicle: document.getElementById('fcpVehicle').value,
                 gatePass: document.getElementById('fcpGP').value || '',
                 exitTime: new Date().toISOString(),
                 status: 'out',
-                createdBy: currentUser.email,
-                createdByUid: currentUser.uid
+                user: currentUser
             };
             
-            db.collection('fcp').add(data)
-                .then(function() {
-                    document.getElementById('fcpForm').reset();
-                    loadAllData();
-                    alert('Exit recorded!');
-                })
-                .catch(function(error) {
-                    alert('Error: ' + error.message);
-                });
-        }
-
-        function checkout(type, id) {
-            if (!confirm('Confirm checkout?')) return;
+            let fcp = JSON.parse(localStorage.getItem('gms_fcp') || '[]');
+            fcp.push(data);
+            localStorage.setItem('gms_fcp', JSON.stringify(fcp));
             
-            db.collection(type).doc(id).update({
-                status: 'out',
-                exitTime: new Date().toISOString()
-            })
-            .then(function() {
-                loadAllData();
-                alert('Checked out!');
-            })
-            .catch(function(error) {
-                alert('Error: ' + error.message);
-            });
+            document.getElementById('fcpForm').reset();
+            loadAllData();
+            alert('تم تسجيل الخروج!');
         }
 
+        // تسجيل خروج مركبة
+        function checkout(type, id) {
+            if (!confirm('تأكيد الخروج؟')) return;
+            
+            let items = JSON.parse(localStorage.getItem('gms_' + type) || '[]');
+            const index = items.findIndex(item => item.id === id);
+            
+            if (index !== -1) {
+                items[index].status = 'out';
+                items[index].exitTime = new Date().toISOString();
+                localStorage.setItem('gms_' + type, JSON.stringify(items));
+                loadAllData();
+                alert('تم تسجيل الخروج!');
+            }
+        }
+
+        // تحميل جميع البيانات
         function loadAllData() {
             loadVisits();
             loadFNQ();
@@ -823,159 +627,147 @@ js_code ='''
             updateStats();
         }
 
+        // تحميل الزيارات
         function loadVisits() {
-            db.collection('visits')
-                .where('status', '==', 'in')
-                .onSnapshot(function(snapshot) {
-                    const tbody = document.getElementById('visitsTable');
-                    tbody.innerHTML = '';
-                    
-                    snapshot.forEach(function(doc) {
-                        const data = doc.data();
-                        // Filter for today only
-                        if (!isToday(data.entryTime)) return;
-                        
-                        const row = document.createElement('tr');
-                        row.innerHTML = 
-                            '<td>' + data.driver + '</td>' +
-                            '<td>' + data.company + '</td>' +
-                            '<td>' + data.vehicle + '</td>' +
-                            '<td>' + data.destination + '</td>' +
-                            '<td><span class="record-time">' + formatDateTime(data.entryTime) + '</span></td>' +
-                            '<td>' +
-                                '<button onclick="checkout(\'visits\', \'' + doc.id + '\')" class="btn-small btn-out">Out</button>' +
-                            '</td>';
-                        tbody.appendChild(row);
-                    });
-                });
+            const visits = JSON.parse(localStorage.getItem('gms_visits') || '[]');
+            const tbody = document.getElementById('visitsTable');
+            tbody.innerHTML = '';
+            
+            visits.filter(v => v.status === 'in' && isToday(v.entryTime)).forEach(v => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${v.driver}</td>
+                    <td>${v.company}</td>
+                    <td>${v.vehicle}</td>
+                    <td>${v.destination}</td>
+                    <td><span class="time-box">${formatDateTime(v.entryTime)}</span></td>
+                    <td>
+                        <button onclick="checkout('visits', ${v.id})" class="btn-action btn-out">خروج</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
+        // تحميل FNQ
         function loadFNQ() {
-            db.collection('fnq')
-                .where('status', '==', 'in')
-                .onSnapshot(function(snapshot) {
-                    const tbody = document.getElementById('fnqTable');
-                    tbody.innerHTML = '';
-                    
-                    snapshot.forEach(function(doc) {
-                        const data = doc.data();
-                        // Filter for today only
-                        if (!isToday(data.entryTime)) return;
-                        
-                        const row = document.createElement('tr');
-                        row.innerHTML = 
-                            '<td>' + data.vehicle + '</td>' +
-                            '<td>' + data.company + '</td>' +
-                            '<td>' + (data.gatePass || '-') + '</td>' +
-                            '<td><span class="record-time">' + formatDateTime(data.entryTime) + '</span></td>' +
-                            '<td>' +
-                                '<button onclick="checkout(\'fnq\', \'' + doc.id + '\')" class="btn-small btn-out">Out</button>' +
-                            '</td>';
-                        tbody.appendChild(row);
-                    });
-                });
+            const fnq = JSON.parse(localStorage.getItem('gms_fnq') || '[]');
+            const tbody = document.getElementById('fnqTable');
+            tbody.innerHTML = '';
+            
+            fnq.filter(f => f.status === 'in' && isToday(f.entryTime)).forEach(f => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${f.vehicle}</td>
+                    <td>${f.company}</td>
+                    <td>${f.gatePass || '-'}</td>
+                    <td><span class="time-box">${formatDateTime(f.entryTime)}</span></td>
+                    <td>
+                        <button onclick="checkout('fnq', ${f.id})" class="btn-action btn-out">خروج</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
+        // تحميل FCP
         function loadFCP() {
-            db.collection('fcp')
-                .orderBy('exitTime', 'desc')
-                .onSnapshot(function(snapshot) {
-                    const tbody = document.getElementById('fcpTable');
-                    tbody.innerHTML = '';
-                    
-                    snapshot.forEach(function(doc) {
-                        const data = doc.data();
-                        // Filter for today only
-                        if (!isToday(data.exitTime)) return;
-                        
-                        const row = document.createElement('tr');
-                        row.innerHTML = 
-                            '<td>' + data.vehicle + '</td>' +
-                            '<td>' + (data.gatePass || '-') + '</td>' +
-                            '<td><span class="record-time">' + formatDateTime(data.exitTime) + '</span></td>' +
-                            '<td class="status-out">OUT</td>';
-                        tbody.appendChild(row);
-                    });
-                });
+            const fcp = JSON.parse(localStorage.getItem('gms_fcp') || '[]');
+            const tbody = document.getElementById('fcpTable');
+            tbody.innerHTML = '';
+            
+            // فلترة حسب اليوم وترتيب حسب الوقت (الأحدث أولاً)
+            fcp.filter(f => isToday(f.exitTime))
+               .sort((a, b) => new Date(b.exitTime) - new Date(a.exitTime))
+               .forEach(f => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${f.vehicle}</td>
+                    <td>${f.gatePass || '-'}</td>
+                    <td><span class="time-box">${formatDateTime(f.exitTime)}</span></td>
+                    <td style="color: #e74c3c; font-weight: bold;">OUT</td>
+                `;
+                tbody.appendChild(row);
+            });
         }
 
+        // تحميل السجل
         function loadHistory() {
+            const visits = JSON.parse(localStorage.getItem('gms_visits') || '[]');
+            const fnq = JSON.parse(localStorage.getItem('gms_fnq') || '[]');
+            const fcp = JSON.parse(localStorage.getItem('gms_fcp') || '[]');
+            
+            const tbody = document.getElementById('historyTable');
+            tbody.innerHTML = '';
+            
             const allData = [];
             
-            Promise.all([
-                db.collection('visits').get(),
-                db.collection('fnq').get(),
-                db.collection('fcp').get()
-            ]).then(function(results) {
-                const tbody = document.getElementById('historyTable');
-                tbody.innerHTML = '';
-                
-                results.forEach(function(snapshot, index) {
-                    const types = ['visit', 'fnq', 'fcp'];
-                    const type = types[index];
-                    
-                    snapshot.forEach(function(doc) {
-                        const data = doc.data();
-                        if (!isToday(data.entryTime || data.exitTime)) return;
-                        
-                        const details = data.driver ? 
-                            (data.driver + ' - ' + data.vehicle) : 
-                            (data.vehicle + (data.gatePass ? ' (GP: ' + data.gatePass + ')' : ''));
-                        
-                        const time = data.exitTime || data.entryTime;
-                        const status = data.status === 'in' ? 
-                            '<span class="status-in">IN</span>' : 
-                            '<span class="status-out">OUT</span>';
-                        
-                        const row = document.createElement('tr');
-                        row.innerHTML = 
-                            '<td>' + type.toUpperCase() + '</td>' +
-                            '<td>' + details + '</td>' +
-                            '<td><span class="record-time">' + formatDateTime(time) + '</span></td>' +
-                            '<td>' + status + '</td>';
-                        tbody.appendChild(row);
-                    });
+            visits.filter(v => isToday(v.entryTime)).forEach(v => {
+                allData.push({
+                    type: 'زيارة',
+                    details: `${v.driver} - ${v.vehicle}`,
+                    time: v.entryTime,
+                    status: v.status
                 });
+            });
+            
+            fnq.filter(f => isToday(f.entryTime)).forEach(f => {
+                allData.push({
+                    type: 'FNQ',
+                    details: `${f.vehicle} - ${f.company}`,
+                    time: f.entryTime,
+                    status: f.status
+                });
+            });
+            
+            fcp.filter(f => isToday(f.exitTime)).forEach(f => {
+                allData.push({
+                    type: 'FCP',
+                    details: f.vehicle,
+                    time: f.exitTime,
+                    status: 'out'
+                });
+            });
+            
+            // ترتيب حسب الوقت (الأحدث أولاً)
+            allData.sort((a, b) => new Date(b.time) - new Date(a.time));
+            
+            allData.forEach(item => {
+                const row = document.createElement('tr');
+                const statusText = item.status === 'in' ? 
+                    '<span style="color: #27ae60; font-weight: bold;">داخل</span>' : 
+                    '<span style="color: #e74c3c; font-weight: bold;">خارج</span>';
+                
+                row.innerHTML = `
+                    <td>${item.type}</td>
+                    <td>${item.details}</td>
+                    <td><span class="time-box">${formatDateTime(item.time)}</span></td>
+                    <td>${statusText}</td>
+                `;
+                tbody.appendChild(row);
             });
         }
 
+        // تحديث الإحصائيات
         function updateStats() {
-            let todayEntries = 0;
-            let currentlyInside = 0;
-            let exitedToday = 0;
+            const visits = JSON.parse(localStorage.getItem('gms_visits') || '[]');
+            const fnq = JSON.parse(localStorage.getItem('gms_fnq') || '[]');
+            const fcp = JSON.parse(localStorage.getItem('gms_fcp') || '[]');
             
-            Promise.all([
-                db.collection('visits').get(),
-                db.collection('fnq').get(),
-                db.collection('fcp').get()
-            ]).then(function(results) {
-                results[0].forEach(function(doc) {
-                    const data = doc.data();
-                    if (isToday(data.entryTime)) {
-                        todayEntries++;
-                        if (data.status === 'in') currentlyInside++;
-                    }
-                });
-                
-                results[1].forEach(function(doc) {
-                    const data = doc.data();
-                    if (isToday(data.entryTime)) {
-                        todayEntries++;
-                        if (data.status === 'in') currentlyInside++;
-                    }
-                });
-                
-                results[2].forEach(function(doc) {
-                    const data = doc.data();
-                    if (isToday(data.exitTime)) {
-                        exitedToday++;
-                    }
-                });
-                
-                document.getElementById('statToday').textContent = todayEntries;
-                document.getElementById('statInside').textContent = currentlyInside;
-                document.getElementById('statExited').textContent = exitedToday;
-            });
+            const todayVisits = visits.filter(v => isToday(v.entryTime));
+            const todayFNQ = fnq.filter(f => isToday(f.entryTime));
+            const todayFCP = fcp.filter(f => isToday(f.exitTime));
+            
+            const entries = todayVisits.length + todayFNQ.length;
+            const inside = todayVisits.filter(v => v.status === 'in').length + 
+                          todayFNQ.filter(f => f.status === 'in').length;
+            const exited = todayVisits.filter(v => v.status === 'out').length + 
+                          todayFNQ.filter(f => f.status === 'out').length + 
+                          todayFCP.length;
+            
+            document.getElementById('statEntries').textContent = entries;
+            document.getElementById('statInside').textContent = inside;
+            document.getElementById('statExited').textContent = exited;
         }
     </script>
 </body>
