@@ -1,11 +1,11 @@
-  <!DOCTYPE html>
+# إنشاء ملف HTML كامل ومتكامل
+html_content = '''<!DOCTYPE html>
 <html lang="en" dir="ltr">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Gate Management System</title>
     
-    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
@@ -42,7 +42,6 @@
         .header h1 { font-size: 20px; }
         .user-info { display: flex; align-items: center; gap: 15px; flex-wrap: wrap; }
         
-        /* تاريخ ووقت واضحين في الهيدر */
         .datetime-display { 
             background: rgba(255,255,255,0.15); 
             padding: 8px 15px; 
@@ -76,15 +75,7 @@
         .status-in { color: #27ae60; font-weight: bold; }
         .status-out { color: #e74c3c; font-weight: bold; }
         .sync-pending { color: #f39c12; font-size: 12px; }
-        
-        /* عرض التاريخ والوقت في كل سجل */
-        .record-datetime {
-            background: #ecf0f1;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-family: monospace;
-            font-size: 13px;
-        }
+        .record-datetime { background: #ecf0f1; padding: 4px 8px; border-radius: 4px; font-family: monospace; font-size: 13px; }
         
         .action-btns { display: flex; gap: 5px; }
         .btn-small { padding: 6px 12px; font-size: 12px; border: none; border-radius: 4px; cursor: pointer; }
@@ -102,12 +93,7 @@
         
         .hidden { display: none !important; }
         .admin-badge { background: #e74c3c; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px; margin-left: 10px; }
-        
-        /* حقول الوقت - read only */
-        .time-field {
-            background: #ecf0f1 !important;
-            cursor: not-allowed;
-        }
+        .time-field { background: #ecf0f1 !important; cursor: not-allowed; }
         
         @media print {
             .header, .nav-tabs, .action-btns, .btn { display: none !important; }
@@ -180,7 +166,6 @@
             <div class="header-content">
                 <h1 data-en="Gate Management System" data-ar="نظام إدارة البوابة">Gate Management System</h1>
                 
-                <!-- عرض التاريخ والوقت واضحين في الهيدر -->
                 <div class="datetime-display">
                     <div class="date" id="headerDate">--/--/----</div>
                     <div class="time" id="headerTime">--:--:--</div>
@@ -255,8 +240,6 @@
                                     <option value="WORK SHOP">WORK SHOP</option>
                                 </select>
                             </div>
-                            <!-- الوقت التلقائي - hidden field -->
-                            <input type="hidden" id="visitEntryTime">
                         </div>
                         <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Save Entry" data-ar="حفظ">Save Entry</button>
                     </form>
@@ -305,8 +288,6 @@
                                 <label data-en="Gate Pass" data-ar="رقم الجيت باس">Gate Pass</label>
                                 <input type="text" id="fnqGP" placeholder="Empty / فارغ">
                             </div>
-                            <!-- الوقت التلقائي - hidden field -->
-                            <input type="hidden" id="fnqEntryTime">
                         </div>
                         <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Save Entry" data-ar="حفظ">Save Entry</button>
                     </form>
@@ -345,8 +326,6 @@
                                 <label data-en="Gate Pass" data-ar="رقم الجيت باس">Gate Pass</label>
                                 <input type="text" id="fcpGP" placeholder="Empty / فارغ">
                             </div>
-                            <!-- الوقت التلقائي - hidden field -->
-                            <input type="hidden" id="fcpExitTime">
                         </div>
                         <button type="submit" class="btn btn-success" style="margin-top: 20px; width: auto; padding: 12px 30px;" data-en="Record Exit" data-ar="تسجيل الخروج">Record Exit</button>
                     </form>
@@ -501,7 +480,9 @@
     <script>
 '''
 
-# إضافة الجزء الثاني - JavaScript
+print(f"تم إنشاء HTML: {len(html_content)} حرف")
+      
+# إضافة JavaScript
 js_part = '''
         // Firebase Configuration
         const firebaseConfig = {
@@ -524,7 +505,7 @@ js_part = '''
         let isAdmin = false;
         let currentLang = 'en';
         let isOnline = navigator.onLine;
-        let currentDay = null; // لتتبع تغيير اليوم
+        let currentDay = null;
 
         // Initialize
         document.addEventListener('DOMContentLoaded', function() {
@@ -532,12 +513,12 @@ js_part = '''
             setupEventListeners();
             setupNetworkListeners();
             
-            // بدء تحديث الساعة في الهيدر
+            // Start clock update
             updateHeaderDateTime();
             setInterval(updateHeaderDateTime, 1000);
             
-            // مراقبة تغيير اليوم
-            setInterval(checkDayChange, 60000); // كل دقيقة
+            // Check day change every minute
+            setInterval(checkDayChange, 60000);
             
             // Check auth state
             auth.onAuthStateChanged(async (user) => {
@@ -551,25 +532,19 @@ js_part = '''
             });
         });
 
-        // تحديث التاريخ والوقت في الهيدر
         function updateHeaderDateTime() {
             const now = new Date();
-            const dateStr = formatDateDDMMYYYY(now);
-            const timeStr = formatTimeFull(now);
-            
-            document.getElementById('headerDate').textContent = dateStr;
-            document.getElementById('headerTime').textContent = timeStr;
+            document.getElementById('headerDate').textContent = formatDateDDMMYYYY(now);
+            document.getElementById('headerTime').textContent = formatTimeFull(now);
         }
 
-        // تنسيق التاريخ DD/MM/YYYY
         function formatDateDDMMYYYY(date) {
             const day = String(date.getDate()).padStart(2, '0');
             const month = String(date.getMonth() + 1).padStart(2, '0');
             const year = date.getFullYear();
-            return `${day}/${month}/${year}`;
+            return day + '/' + month + '/' + year;
         }
 
-        // تنسيق الوقت الكامل
         function formatTimeFull(date) {
             return date.toLocaleTimeString(currentLang === 'ar' ? 'ar-SA' : 'en-US', {
                 hour: '2-digit',
@@ -579,13 +554,11 @@ js_part = '''
             });
         }
 
-        // التحقق من تغيير اليوم (نظام اليومية 24 ساعة)
         function checkDayChange() {
             const now = new Date();
             const today = formatDateDDMMYYYY(now);
             
             if (currentDay && currentDay !== today) {
-                // يوم جديد - إعادة تعيين العدادات أو تحميل بيانات اليوم الجديد
                 currentDay = today;
                 loadAllTables();
                 updateStats();
@@ -594,7 +567,6 @@ js_part = '''
             }
         }
 
-        // الحصول على الوقت الحالي تلقائياً
         function getCurrentDateTime() {
             return new Date().toISOString();
         }
@@ -662,7 +634,6 @@ js_part = '''
             startRealtimeSync();
         }
 
-        // Auth Functions
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -693,7 +664,7 @@ js_part = '''
                 });
                 
                 const users = JSON.parse(localStorage.getItem('gms_users'));
-                users.push({ email, role: 'admin', uid: userCredential.user.uid });
+                users.push({ email: email, role: 'admin', uid: userCredential.user.uid });
                 localStorage.setItem('gms_users', JSON.stringify(users));
                 
                 alert('Admin created! Please login.');
@@ -711,7 +682,6 @@ js_part = '''
             showLogin();
         }
 
-        // Dual Storage Functions
         async function saveEntry(type, data) {
             const entry = {
                 ...data,
@@ -721,7 +691,7 @@ js_part = '''
                 createdBy: currentUser.email,
                 createdByUid: currentUser.uid,
                 createdAt: new Date().toISOString(),
-                dateKey: formatDateDDMMYYYY(new Date()) // إضافة مفتاح التاريخ
+                dateKey: formatDateDDMMYYYY(new Date())
             };
             
             const localData = JSON.parse(localStorage.getItem('gms_' + type));
@@ -766,16 +736,16 @@ js_part = '''
                     localStorage.setItem('gms_' + type, JSON.stringify(localData));
                     showSyncStatus(false);
                 } catch (error) {
-                    addToPendingSync('update', type, { id, updates, firestoreId: localData[index].firestoreId });
+                    addToPendingSync('update', type, { id: id, updates: updates, firestoreId: localData[index].firestoreId });
                 }
             } else {
-                addToPendingSync('update', type, { id, updates });
+                addToPendingSync('update', type, { id: id, updates: updates });
             }
         }
 
         function addToPendingSync(operation, type, data) {
             const pending = JSON.parse(localStorage.getItem('gms_pending_sync') || '[]');
-            pending.push({ operation, type, data, timestamp: Date.now() });
+            pending.push({ operation: operation, type: type, data: data, timestamp: Date.now() });
             localStorage.setItem('gms_pending_sync', JSON.stringify(pending));
         }
 
@@ -841,14 +811,12 @@ js_part = '''
             return merged;
         }
 
-        // Form Handlers
         function setupEventListeners() {
             document.getElementById('loginForm').addEventListener('submit', handleLogin);
             document.getElementById('adminSetupForm').addEventListener('submit', handleAdminSetup);
             
             document.getElementById('visitForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // الوقت التلقائي من الجهاز
                 const entryTime = getCurrentDateTime();
                 
                 await saveEntry('visits', {
@@ -857,7 +825,8 @@ js_part = '''
                     vehicle: document.getElementById('visitVehicle').value,
                     destination: document.getElementById('visitDestination').value,
                     entryTime: entryTime,
-                    exitTime: null, status: 'in'
+                    exitTime: null, 
+                    status: 'in'
                 });
                 document.getElementById('visitForm').reset();
                 loadVisitsTable();
@@ -867,7 +836,6 @@ js_part = '''
 
             document.getElementById('fnqForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // الوقت التلقائي من الجهاز
                 const entryTime = getCurrentDateTime();
                 const gp = document.getElementById('fnqGP').value || '';
                 
@@ -876,7 +844,8 @@ js_part = '''
                     company: document.getElementById('fnqCompany').value,
                     gatePass: gp,
                     entryTime: entryTime,
-                    exitTime: null, status: 'in'
+                    exitTime: null, 
+                    status: 'in'
                 });
                 document.getElementById('fnqForm').reset();
                 loadFNQTable();
@@ -886,7 +855,6 @@ js_part = '''
 
             document.getElementById('fcpForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
-                // الوقت التلقائي من الجهاز
                 const exitTime = getCurrentDateTime();
                 const gp = document.getElementById('fcpGP').value || '';
                 
@@ -913,11 +881,13 @@ js_part = '''
                 try {
                     const userCredential = await auth.createUserWithEmailAndPassword(email, password);
                     await db.collection('users').doc(userCredential.user.uid).set({
-                        email, role, createdAt: new Date().toISOString()
+                        email: email, 
+                        role: role, 
+                        createdAt: new Date().toISOString()
                     });
                     
                     const users = JSON.parse(localStorage.getItem('gms_users'));
-                    users.push({ email, role, uid: userCredential.user.uid });
+                    users.push({ email: email, role: role, uid: userCredential.user.uid });
                     localStorage.setItem('gms_users', JSON.stringify(users));
                     
                     document.getElementById('addUserForm').reset();
@@ -1028,12 +998,10 @@ js_part = '''
             window.print();
         };
 
-        // Table Loading
         function loadVisitsTable() {
             let visits = JSON.parse(localStorage.getItem('gms_visits'));
             const today = formatDateDDMMYYYY(new Date());
             
-            // تصفية حسب اليوم الحالي فقط (نظام اليومية)
             visits = visits.filter(v => v.dateKey === today || isToday(v.createdAt));
             
             if (!isAdmin) {
@@ -1042,26 +1010,25 @@ js_part = '''
             const active = visits.filter(v => v.status === 'in');
             const tbody = document.getElementById('visitsTable');
             
-            tbody.innerHTML = active.map(v => `
-                <tr>
-                    <td>${v.driver}</td>
-                    <td>${v.company}</td>
-                    <td>${v.vehicle}</td>
-                    <td>${v.destination}</td>
-                    <td><span class="record-datetime">${formatDateTime(v.entryTime)}</span> ${!v.synced ? '<span class="sync-pending">⌛</span>' : ''}</td>
-                    <td class="action-btns">
-                        <button onclick="editEntry('visits', ${v.id})" class="btn-small btn-warning">Edit</button>
-                        <button onclick="checkoutEntry('visits', ${v.id})" class="btn-small btn-danger">Out</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = active.map(v => 
+                '<tr>' +
+                    '<td>' + v.driver + '</td>' +
+                    '<td>' + v.company + '</td>' +
+                    '<td>' + v.vehicle + '</td>' +
+                    '<td>' + v.destination + '</td>' +
+                    '<td><span class="record-datetime">' + formatDateTime(v.entryTime) + '</span>' + (!v.synced ? ' <span class="sync-pending">⌛</span>' : '') + '</td>' +
+                    '<td class="action-btns">' +
+                        '<button onclick="editEntry(\'visits\', ' + v.id + ')" class="btn-small btn-warning">Edit</button>' +
+                        '<button onclick="checkoutEntry(\'visits\', ' + v.id + ')" class="btn-small btn-danger">Out</button>' +
+                    '</td>' +
+                '</tr>'
+            ).join('');
         }
 
         function loadFNQTable() {
             let fnq = JSON.parse(localStorage.getItem('gms_fnq'));
             const today = formatDateDDMMYYYY(new Date());
             
-            // تصفية حسب اليوم الحالي فقط (نظام اليومية)
             fnq = fnq.filter(f => f.dateKey === today || isToday(f.createdAt));
             
             if (!isAdmin) {
@@ -1070,44 +1037,43 @@ js_part = '''
             const active = fnq.filter(f => f.status === 'in');
             const tbody = document.getElementById('fnqTable');
             
-            tbody.innerHTML = active.map(f => `
-                <tr>
-                    <td>${f.vehicle}</td>
-                    <td>${f.company}</td>
-                    <td>${f.gatePass || '-'}</td>
-                    <td><span class="record-datetime">${formatDateTime(f.entryTime)}</span> ${!f.synced ? '<span class="sync-pending">⌛</span>' : ''}</td>
-                    <td class="action-btns">
-                        <button onclick="editEntry('fnq', ${f.id})" class="btn-small btn-warning">Edit</button>
-                        <button onclick="checkoutEntry('fnq', ${f.id})" class="btn-small btn-danger">Out</button>
-                    </td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = active.map(f => 
+                '<tr>' +
+                    '<td>' + f.vehicle + '</td>' +
+                    '<td>' + f.company + '</td>' +
+                    '<td>' + (f.gatePass || '-') + '</td>' +
+                    '<td><span class="record-datetime">' + formatDateTime(f.entryTime) + '</span>' + (!f.synced ? ' <span class="sync-pending">⌛</span>' : '') + '</td>' +
+                    '<td class="action-btns">' +
+                        '<button onclick="editEntry(\'fnq\', ' + f.id + ')" class="btn-small btn-warning">Edit</button>' +
+                        '<button onclick="checkoutEntry(\'fnq\', ' + f.id + ')" class="btn-small btn-danger">Out</button>' +
+                    '</td>' +
+                '</tr>'
+            ).join('');
         }
 
         function loadFCPTable() {
             let fcp = JSON.parse(localStorage.getItem('gms_fcp'));
             const today = formatDateDDMMYYYY(new Date());
             
-            // عرض كل العربيات اللي خرجت النهاردة فقط
             fcp = fcp.filter(f => f.dateKey === today || isToday(f.createdAt));
             
             if (!isAdmin) {
                 fcp = fcp.filter(f => f.createdByUid === currentUser.uid);
             }
             
-            // ترتيب حسب وقت الخروج (الأحدث أولاً)
+            // Sort by exit time (newest first)
             fcp.sort((a, b) => new Date(b.exitTime) - new Date(a.exitTime));
             
             const tbody = document.getElementById('fcpTable');
             
-            tbody.innerHTML = fcp.map(f => `
-                <tr>
-                    <td>${f.vehicle}</td>
-                    <td>${f.gatePass || '-'}</td>
-                    <td><span class="record-datetime">${formatDateTime(f.exitTime)}</span> ${!f.synced ? '<span class="sync-pending">⌛</span>' : ''}</td>
-                    <td><span class="status-out">OUT</span></td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = fcp.map(f => 
+                '<tr>' +
+                    '<td>' + f.vehicle + '</td>' +
+                    '<td>' + (f.gatePass || '-') + '</td>' +
+                    '<td><span class="record-datetime">' + formatDateTime(f.exitTime) + '</span>' + (!f.synced ? ' <span class="sync-pending">⌛</span>' : '') + '</td>' +
+                    '<td><span class="status-out">OUT</span></td>' +
+                '</tr>'
+            ).join('');
         }
 
         function loadAllTables() {
@@ -1117,7 +1083,6 @@ js_part = '''
             updateStats();
         }
 
-        // التحقق مما إذا كان التاريخ هو اليوم الحالي
         function isToday(dateString) {
             if (!dateString) return false;
             const date = new Date(dateString);
@@ -1127,7 +1092,6 @@ js_part = '''
                    date.getFullYear() === today.getFullYear();
         }
 
-        // تحديث الإحصائيات
         function updateStats() {
             const today = formatDateDDMMYYYY(new Date());
             
@@ -1135,7 +1099,6 @@ js_part = '''
             let fnq = JSON.parse(localStorage.getItem('gms_fnq'));
             let fcp = JSON.parse(localStorage.getItem('gms_fcp'));
             
-            // تصفية حسب اليوم الحالي
             visits = visits.filter(v => v.dateKey === today || isToday(v.createdAt));
             fnq = fnq.filter(f => f.dateKey === today || isToday(f.createdAt));
             fcp = fcp.filter(f => f.dateKey === today || isToday(f.createdAt));
@@ -1165,31 +1128,27 @@ js_part = '''
                 if (filter !== 'all' && filter !== type) return;
                 let data = JSON.parse(localStorage.getItem('gms_' + type));
                 
-                // تصفية حسب اليوم الحالي فقط
                 data = data.filter(d => d.dateKey === today || isToday(d.createdAt));
                 
                 if (!isAdmin) {
                     data = data.filter(d => d.createdByUid === currentUser.uid);
                 }
-                data.forEach(d => allEntries.push({...d, type}));
+                data.forEach(d => allEntries.push({...d, type: type}));
             });
             
-            // ترتيب حسب الوقت (الأحدث أولاً)
             allEntries.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
             
             const tbody = document.getElementById('historyTable');
             tbody.innerHTML = allEntries.map(e => {
-                const details = e.driver ? `${e.driver} - ${e.vehicle}` : e.vehicle;
+                const details = e.driver ? (e.driver + ' - ' + e.vehicle) : e.vehicle;
                 const time = e.exitTime || e.entryTime;
-                return `
-                    <tr>
-                        <td>${e.type.toUpperCase()}</td>
-                        <td>${details}</td>
-                        <td><span class="record-datetime">${formatDateTime(time)}</span></td>
-                        <td class="${e.status === 'in' ? 'status-in' : 'status-out'}">${e.status.toUpperCase()}</td>
-                        <td>${e.createdBy}</td>
-                    </tr>
-                `;
+                return '<tr>' +
+                    '<td>' + e.type.toUpperCase() + '</td>' +
+                    '<td>' + details + '</td>' +
+                    '<td><span class="record-datetime">' + formatDateTime(time) + '</span></td>' +
+                    '<td class="' + (e.status === 'in' ? 'status-in' : 'status-out') + '">' + e.status.toUpperCase() + '</td>' +
+                    '<td>' + e.createdBy + '</td>' +
+                '</tr>';
             }).join('');
         }
 
@@ -1205,14 +1164,14 @@ js_part = '''
             }
             
             const tbody = document.getElementById('usersTable');
-            tbody.innerHTML = users.map(u => `
-                <tr>
-                    <td>${u.email}</td>
-                    <td>${u.role}</td>
-                    <td>${new Date(u.createdAt).toLocaleDateString()}</td>
-                    <td>-</td>
-                </tr>
-            `).join('');
+            tbody.innerHTML = users.map(u => 
+                '<tr>' +
+                    '<td>' + u.email + '</td>' +
+                    '<td>' + u.role + '</td>' +
+                    '<td>' + new Date(u.createdAt).toLocaleDateString() + '</td>' +
+                    '<td>-</td>' +
+                '</tr>'
+            ).join('');
         }
 
         function loadCompanies() {
@@ -1221,7 +1180,7 @@ js_part = '''
             const currentValue = select.value;
             select.innerHTML = '<option value="">Select / اختر</option>';
             companies.forEach(c => {
-                select.innerHTML += `<option value="${c}">${c}</option>`;
+                select.innerHTML += '<option value="' + c + '">' + c + '</option>';
             });
             select.value = currentValue;
         }
@@ -1235,7 +1194,7 @@ js_part = '''
                 minute: '2-digit',
                 hour12: false
             });
-            return `${dateStr} ${timeStr}`;
+            return dateStr + ' ' + timeStr;
         }
 
         window.editEntry = function(type, id) {
@@ -1249,24 +1208,27 @@ js_part = '''
             
             let fieldsHtml = '';
             if (type === 'visits') {
-                fieldsHtml = `
-                    <div class="form-group"><label>Driver</label><input type="text" id="editDriver" value="${entry.driver}" required></div>
-                    <div class="form-group"><label>Company</label><input type="text" id="editCompany" value="${entry.company}" required></div>
-                    <div class="form-group"><label>Vehicle</label><input type="text" id="editVehicle" value="${entry.vehicle}" required></div>
-                    <div class="form-group"><label>Destination</label><input type="text" id="editDestination" value="${entry.destination}" required></div>
-                    <div class="form-group"><label>Entry Time</label><input type="text" id="editEntryTime" value="${formatDateTime(entry.entryTime)}" class="time-field" readonly></div>
-                `;
+                fieldsHtml = 
+                    '<div class="form-group"><label>Driver</label><input type="text" id="editDriver" value="' + entry.driver + '" required></div>' +
+                    '<div class="form-group"><label>Company</label><input type="text" id="editCompany" value="' + entry.company + '" required></div>' +
+                    '<div class="form-group"><label>Vehicle</label><input type="text" id="editVehicle" value="' + entry.vehicle + '" required></div>' +
+                    '<div class="form-group"><label>Destination</label><input type="text" id="editDestination" value="' + entry.destination + '" required></div>' +
+                    '<div class="form-group"><label>Entry Time</label><input type="text" id="editEntryTime" value="' + formatDateTime(entry.entryTime) + '" class="time-field" readonly></div>';
             } else {
-                fieldsHtml = `
-                    <div class="form-group"><label>Vehicle</label><input type="text" id="editVehicle" value="${entry.vehicle}" required></div>
-                    <div class="form-group"><label>Company</label><input type="text" id="editCompany" value="${entry.company}" required></div>
-                    <div class="form-group"><label>Gate Pass</label><input type="text" id="editGP" value="${entry.gatePass || ''}"></div>
-                    <div class="form-group"><label>Entry Time</label><input type="text" id="editEntryTime" value="${formatDateTime(entry.entryTime)}" class="time-field" readonly></div>
-                `;
+                fieldsHtml = 
+                    '<div class="form-group"><label>Vehicle</label><input type="text" id="editVehicle" value="' + entry.vehicle + '" required></div>' +
+                    '<div class="form-group"><label>Company</label><input type="text" id="editCompany" value="' + entry.company + '" required></div>' +
+                    '<div class="form-group"><label>Gate Pass</label><input type="text" id="editGP" value="' + (entry.gatePass || '') + '"></div>' +
+                    '<div class="form-group"><label>Entry Time</label><input type="text" id="editEntryTime" value="' + formatDateTime(entry.entryTime) + '" class="time-field" readonly></div>';
             }
             document.getElementById('editFields').innerHTML = fieldsHtml;
             document.getElementById('editModal').classList.add('active');
         };
     </script>
 </body>
-</html>
+</html>'''
+
+# دمج الكود
+final_html = html_content + js_part
+
+print(f"✅ تم إنشاء الملف الكامل: {len(final_html)} حرف")
