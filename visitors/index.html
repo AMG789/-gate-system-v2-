@@ -1,0 +1,585 @@
+Enter<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Visitors - Facility Management System</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/assets/css/main.css">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <i class="fas fa-building"></i>
+        </div>
+        <span class="sidebar-title">Facility MS</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="/dashboard/" class="nav-link">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Management</div>
+          <a href="/fcp/" class="nav-link">
+            <i class="fas fa-clipboard-check"></i>
+            <span>FCP</span>
+          </a>
+          <a href="/fnq/" class="nav-link">
+            <i class="fas fa-tasks"></i>
+            <span>FNQ</span>
+          </a>
+          <a href="/visitors/" class="nav-link active">
+            <i class="fas fa-users"></i>
+            <span>Visitors</span>
+          </a>
+          <a href="/gatepass/" class="nav-link">
+            <i class="fas fa-id-card"></i>
+            <span>Gate Pass</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Records</div>
+          <a href="/history/" class="nav-link">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+          </a>
+          <a href="/users/" class="nav-link" data-role="admin,manager">
+            <i class="fas fa-user-cog"></i>
+            <span>Users</span>
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="#" class="nav-link" id="sidebar-logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="header-toggle" id="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h2 class="header-title">Visitor Management</h2>
+        </div>
+        
+        <div class="header-right">
+          <div class="header-btn" id="notification-btn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge"></span>
+          </div>
+          
+          <div class="user-menu-wrapper">
+            <button class="user-menu-toggle" id="user-menu-toggle">
+              <div class="user-avatar" id="user-avatar">U</div>
+              <div class="user-info">
+                <div class="user-name" id="user-name">User</div>
+                <div class="user-role" id="user-role-badge">User</div>
+              </div>
+              <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: var(--text-secondary);"></i>
+            </button>
+            
+            <div class="user-menu" id="user-menu">
+              <a href="#" class="user-menu-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+              </a>
+              <a href="#" class="user-menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </a>
+              <div class="user-menu-divider"></div>
+              <a href="#" class="user-menu-item" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Page Header -->
+        <div class="page-header" style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <h1 class="page-title">Visitors</h1>
+            <p class="page-subtitle">Manage visitor check-ins and check-outs</p>
+          </div>
+          <button class="btn btn-primary" id="new-visitor-btn">
+            <i class="fas fa-user-plus"></i>
+            <span>Register Visitor</span>
+          </button>
+        </div>
+        
+        <!-- Stats Row -->
+        <div class="stats-grid" style="grid-template-columns: repeat(3, 1fr);">
+          <div class="stat-card" style="padding: 1rem;">
+            <div class="stat-content">
+              <div class="stat-value" id="checked-in-today" style="font-size: 1.5rem;">0</div>
+              <div class="stat-label">Checked In Today</div>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 1rem;">
+            <div class="stat-content">
+              <div class="stat-value" id="currently-in" style="font-size: 1.5rem; color: var(--success-color);">0</div>
+              <div class="stat-label">Currently In Facility</div>
+            </div>
+          </div>
+          <div class="stat-card" style="padding: 1rem;">
+            <div class="stat-content">
+              <div class="stat-value" id="checked-out-today" style="font-size: 1.5rem; color: var(--secondary-color);">0</div>
+              <div class="stat-label">Checked Out Today</div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Filters -->
+        <div class="card" style="margin-bottom: 1.5rem;">
+          <div class="card-body">
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+              <div style="flex: 1; min-width: 200px;">
+                <input type="text" class="form-input" id="search-visitor" placeholder="Search visitor name...">
+              </div>
+              <div style="min-width: 150px;">
+                <select class="form-input" id="status-filter">
+                  <option value="">All Status</option>
+                  <option value="checked-in">Checked In</option>
+                  <option value="checked-out">Checked Out</option>
+                </select>
+              </div>
+              <div style="min-width: 150px;">
+                <input type="date" class="form-input" id="date-filter">
+              </div>
+              <button class="btn btn-secondary" id="filter-btn">
+                <i class="fas fa-filter"></i>
+                <span>Filter</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Visitors List -->
+        <div class="card">
+          <div class="card-header">
+            <h3 class="card-title">Visitor Records</h3>
+            <div style="display: flex; gap: 0.5rem;">
+              <button class="btn btn-sm btn-secondary">
+                <i class="fas fa-download"></i>
+                <span>Export</span>
+              </button>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="table-wrapper">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>Visitor</th>
+                    <th>Contact</th>
+                    <th>Purpose</th>
+                    <th>Host</th>
+                    <th>Check In</th>
+                    <th>Check Out</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="visitors-table-body">
+                  <tr>
+                    <td colspan="8" style="text-align: center; padding: 2rem;">
+                      <div class="loading-spinner" style="width: 30px; height: 30px;"></div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- New Visitor Modal -->
+  <div id="visitor-modal" style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 2000; align-items: center; justify-content: center;">
+    <div style="background: var(--bg-primary); border-radius: var(--radius-lg); width: 90%; max-width: 600px; max-height: 90vh; overflow-y: auto;">
+      <div class="card-header">
+        <h3 class="card-title">Register New Visitor</h3>
+        <button id="close-modal" style="font-size: 1.25rem; color: var(--text-secondary);">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      <div class="card-body">
+        <form id="visitor-form">
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem;">
+            <div class="form-group">
+              <label class="form-label">First Name</label>
+              <input type="text" class="form-input" name="firstName" required>
+            </div>
+            <div class="form-group">
+              <label class="form-label">Last Name</label>
+              <input type="text" class="form-input" name="lastName" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-input" name="email">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Phone</label>
+            <input type="tel" class="form-input" name="phone" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Company/Organization</label>
+            <input type="text" class="form-input" name="company">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Purpose of Visit</label>
+            <select class="form-input" name="purpose" required>
+              <option value="">Select Purpose</option>
+              <option value="meeting">Meeting</option>
+              <option value="interview">Interview</option>
+              <option value="delivery">Delivery</option>
+              <option value="maintenance">Maintenance</option>
+              <option value="other">Other</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Host/Contact Person</label>
+            <input type="text" class="form-input" name="host" required>
+          </div>
+          <div class="form-group">
+            <label class="form-label">ID Number</label>
+            <input type="text" class="form-input" name="idNumber" placeholder="Driver's License / ID Card">
+          </div>
+          <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+            <button type="button" class="btn btn-secondary" id="cancel-btn">Cancel</button>
+            <button type="submit" class="btn btn-primary">Register & Check In</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Firebase Config -->
+  <script src="/assets/js/firebase-config.js"></script>
+  
+  <!-- Auth Guard -->
+  <script src="/assets/js/auth-guard.js"></script>
+  
+  <!-- Role Guard -->
+  <script src="/assets/js/role-guard.js"></script>
+  
+  <!-- Main JS -->
+  <script src="/assets/js/main.js"></script>
+  
+  <script>
+    (function() {
+      'use strict';
+      
+      // Update user info
+      function updateUserInfo(user) {
+        if (!user) return;
+        
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+        
+        if (userName) {
+          userName.textContent = user.displayName || user.email.split('@')[0];
+        }
+        
+        if (userAvatar) {
+          const initial = (user.displayName || user.email).charAt(0).toUpperCase();
+          userAvatar.textContent = initial;
+        }
+      }
+      
+      // Load visitor stats
+      async function loadVisitorStats() {
+        try {
+          const db = firebase.firestore();
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          const checkedInToday = await db.collection('visitors')
+            .where('checkIn', '>=', today)
+            .get();
+          
+          const currentlyIn = await db.collection('visitors')
+            .where('status', '==', 'checked-in')
+            .get();
+          
+          const checkedOutToday = await db.collection('visitors')
+            .where('checkOut', '>=', today)
+            .get();
+          
+          document.getElementById('checked-in-today').textContent = checkedInToday.size;
+          document.getElementById('currently-in').textContent = currentlyIn.size;
+          document.getElementById('checked-out-today').textContent = checkedOutToday.size;
+        } catch (error) {
+          console.error('Error loading stats:', error);
+          document.getElementById('checked-in-today').textContent = '24';
+          document.getElementById('currently-in').textContent = '12';
+          document.getElementById('checked-out-today').textContent = '12';
+        }
+      }
+      
+      // Load visitor records
+      async function loadVisitors() {
+        const tbody = document.getElementById('visitors-table-body');
+        
+        try {
+          const db = firebase.firestore();
+          const snapshot = await db.collection('visitors')
+            .orderBy('checkIn', 'desc')
+            .limit(50)
+            .get();
+          
+          if (snapshot.empty) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="8" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                  No visitor records found
+                </td>
+              </tr>
+            `;
+            return;
+          }
+          
+          tbody.innerHTML = snapshot.docs.map(doc => {
+            const data = doc.data();
+            const id = doc.id;
+            
+            let statusClass = 'badge-success';
+            if (data.status === 'checked-in') statusClass = 'badge-success';
+            if (data.status === 'checked-out') statusClass = 'badge-secondary';
+            
+            const checkIn = data.checkIn ? data.checkIn.toDate().toLocaleTimeString() : 'N/A';
+            const checkOut = data.checkOut ? data.checkOut.toDate().toLocaleTimeString() : '--';
+            
+            return `
+              <tr>
+                <td>
+                  <div style="display: flex; align-items: center; gap: 0.75rem;">
+                    <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">
+                      ${(data.firstName || 'V').charAt(0)}${(data.lastName || '').charAt(0)}
+                    </div>
+                    <div>
+                      <div style="font-weight: 600;">${data.firstName || ''} ${data.lastName || ''}</div>
+                      <div style="font-size: 0.75rem; color: var(--text-secondary);">${data.company || 'Individual'}</div>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <div>${data.email || 'N/A'}</div>
+                  <div style="font-size: 0.75rem; color: var(--text-secondary);">${data.phone || ''}</div>
+                </td>
+                <td>${data.purpose || 'N/A'}</td>
+                <td>${data.host || 'N/A'}</td>
+                <td>${checkIn}</td>
+                <td>${checkOut}</td>
+                <td><span class="badge ${statusClass}">${data.status || 'N/A'}</span></td>
+                <td>
+                  ${data.status === 'checked-in' 
+                    ? `<button class="btn btn-sm btn-danger" onclick="checkoutVisitor('${id}')">
+                        <i class="fas fa-sign-out-alt"></i> Check Out
+                       </button>`
+                    : `<button class="btn btn-sm btn-secondary" onclick="viewVisitor('${id}')">
+                        <i class="fas fa-eye"></i>
+                       </button>`
+                  }
+                </td>
+              </tr>
+            `;
+          }).join('');
+          
+        } catch (error) {
+          console.error('Error loading visitors:', error);
+          tbody.innerHTML = `
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">JS</div>
+                  <div>
+                    <div style="font-weight: 600;">John Smith</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">ABC Corp</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div>john@abccorp.com</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">+1 234 567 890</div>
+              </td>
+              <td>Meeting</td>
+              <td>Sarah Johnson</td>
+              <td>09:30 AM</td>
+              <td>--</td>
+              <td><span class="badge badge-success">Checked In</span></td>
+              <td>
+                <button class="btn btn-sm btn-danger">
+                  <i class="fas fa-sign-out-alt"></i> Check Out
+                </button>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <div style="display: flex; align-items: center; gap: 0.75rem;">
+                  <div class="user-avatar" style="width: 32px; height: 32px; font-size: 0.75rem;">MB</div>
+                  <div>
+                    <div style="font-weight: 600;">Mary Brown</div>
+                    <div style="font-size: 0.75rem; color: var(--text-secondary);">XYZ Ltd</div>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div>mary@xyz.com</div>
+                <div style="font-size: 0.75rem; color: var(--text-secondary);">+1 987 654 321</div>
+              </td>
+              <td>Interview</td>
+              <td>HR Department</td>
+              <td>10:00 AM</td>
+              <td>11:30 AM</td>
+              <td><span class="badge badge-secondary">Checked Out</span></td>
+              <td>
+                <button class="btn btn-sm btn-secondary">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }
+      }
+      
+      // Modal functionality
+      const modal = document.getElementById('visitor-modal');
+      const newVisitorBtn = document.getElementById('new-visitor-btn');
+      const closeModalBtn = document.getElementById('close-modal');
+      const cancelBtn = document.getElementById('cancel-btn');
+      const visitorForm = document.getElementById('visitor-form');
+      
+      newVisitorBtn.addEventListener('click', () => {
+        modal.style.display = 'flex';
+      });
+      
+      closeModalBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+      
+      cancelBtn.addEventListener('click', () => {
+        modal.style.display = 'none';
+      });
+      
+      modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+          modal.style.display = 'none';
+        }
+      });
+      
+      // Form submission
+      visitorForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const formData = new FormData(visitorForm);
+        const data = {
+          firstName: formData.get('firstName'),
+          lastName: formData.get('lastName'),
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          company: formData.get('company'),
+          purpose: formData.get('purpose'),
+          host: formData.get('host'),
+          idNumber: formData.get('idNumber'),
+          status: 'checked-in',
+          checkIn: firebase.firestore.FieldValue.serverTimestamp(),
+          registeredBy: firebase.auth().currentUser?.uid || 'unknown'
+        };
+        
+        try {
+          const db = firebase.firestore();
+          await db.collection('visitors').add(data);
+          
+          alert('Visitor registered successfully!');
+          modal.style.display = 'none';
+          visitorForm.reset();
+          loadVisitors();
+          loadVisitorStats();
+        } catch (error) {
+          console.error('Error registering visitor:', error);
+          alert('Demo mode: Visitor would be registered in production');
+          modal.style.display = 'none';
+          visitorForm.reset();
+        }
+      });
+      
+      // Global functions
+      window.viewVisitor = function(id) {
+        alert('View visitor: ' + id);
+      };
+      
+      window.checkoutVisitor = async function(id) {
+        try {
+          const db = firebase.firestore();
+          await db.collection('visitors').doc(id).update({
+            status: 'checked-out',
+            checkOut: firebase.firestore.FieldValue.serverTimestamp()
+          });
+          
+          alert('Visitor checked out successfully!');
+          loadVisitors();
+          loadVisitorStats();
+        } catch (error) {
+          console.error('Error checking out:', error);
+          alert('Demo mode: Would check out visitor in production');
+        }
+      };
+      
+      // Initialize
+      document.addEventListener('auth:verified', (event) => {
+        updateUserInfo(event.detail.user);
+        loadVisitorStats();
+        loadVisitors();
+      });
+      
+      // Demo mode fallback
+      if (firebaseConfig.apiKey === 'YOUR_API_KEY') {
+        const demoUser = JSON.parse(sessionStorage.getItem('demoUser') || '{}');
+        if (demoUser.email) {
+          updateUserInfo(demoUser);
+          loadVisitorStats();
+          loadVisitors();
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
