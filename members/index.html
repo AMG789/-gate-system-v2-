@@ -133,10 +133,26 @@
             color: #ef6c00;
         }
         
+        /* Gate Badge */
+        .gate-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        
+        .gate-badge.mine { background: #e8f5e9; color: #2e7d32; }
+        .gate-badge.workshop { background: #e3f2fd; color: #1565c0; }
+        .gate-badge.sals { background: #fff3e0; color: #ef6c00; }
+        .gate-badge.camp { background: #fce4ec; color: #c2185b; }
+        
         /* Employee Cards */
         .employees-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
             gap: 20px;
             margin-bottom: 25px;
         }
@@ -336,6 +352,85 @@
             margin-top: 5px;
         }
         
+        /* Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .modal-overlay.active {
+            display: flex;
+        }
+        
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: modalSlideIn 0.3s ease-out;
+        }
+        
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .modal-header {
+            padding: 25px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .modal-header h3 {
+            margin: 0;
+            color: #2c3e50;
+            font-size: 20px;
+        }
+        
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: #7f8c8d;
+            cursor: pointer;
+            transition: color 0.3s;
+        }
+        
+        .modal-close:hover {
+            color: #e74c3c;
+        }
+        
+        .modal-body {
+            padding: 25px;
+        }
+        
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 1px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+        
         /* Responsive */
         @media (max-width: 768px) {
             .employees-grid {
@@ -350,10 +445,91 @@
                 flex-direction: column;
                 align-items: stretch;
             }
+            
+            .modal-content {
+                max-height: 95vh;
+            }
         }
     </style>
 </head>
 <body>
+    <!-- Edit Modal -->
+    <div class="modal-overlay" id="editModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>✏️ Edit Employee</h3>
+                <button class="modal-close" onclick="closeEditModal()">&times;</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editEmpId">
+                <div class="form-row-4">
+                    <div class="form-group">
+                        <label>Full Name *</label>
+                        <input type="text" id="editEmpName" placeholder="e.g. Ahmed Mohamed">
+                    </div>
+                    <div class="form-group">
+                        <label>Employee Code *</label>
+                        <input type="text" id="editEmpCode" placeholder="e.g. EMP001">
+                    </div>
+                    <div class="form-group">
+                        <label>Job Title *</label>
+                        <select id="editEmpJob">
+                            <option value="Gatekeeper">Gatekeeper</option>
+                            <option value="Security">Security</option>
+                            <option value="Supervisor">Supervisor</option>
+                            <option value="HR">HR</option>
+                            <option value="Admin">Admin</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Gate Location *</label>
+                        <select id="editEmpGate">
+                            <option value="mine">Mine Gate</option>
+                            <option value="workshop">Work Shop Gate</option>
+                            <option value="sals">Sals Gate</option>
+                            <option value="camp">Camp Gate</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-4">
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select id="editEmpStatus">
+                            <option value="active">Active</option>
+                            <option value="vacation">On Vacation</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Shift Start Time</label>
+                        <input type="time" id="editEmpShiftStart">
+                    </div>
+                    <div class="form-group">
+                        <label>Shift End Time</label>
+                        <input type="time" id="editEmpShiftEnd">
+                    </div>
+                    <div class="form-group">
+                        <label>Initial Shift</label>
+                        <select id="editEmpInitialShift">
+                            <option value="morning">Morning</option>
+                            <option value="evening">Evening</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row-4">
+                    <div class="form-group">
+                        <label>Shift Change Date *</label>
+                        <input type="date" id="editEmpShiftChangeDate">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveEmployeeEdit()">💾 Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <div id="dashboard">
         <div class="header">
             <div class="header-content">
@@ -456,14 +632,23 @@
                             </select>
                         </div>
                         <div class="form-group">
+                            <label>Gate Location *</label>
+                            <select id="empGate">
+                                <option value="mine">Mine Gate</option>
+                                <option value="workshop">Work Shop Gate</option>
+                                <option value="sals">Sals Gate</option>
+                                <option value="camp">Camp Gate</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-4">
+                        <div class="form-group">
                             <label>Status</label>
                             <select id="empStatus">
                                 <option value="active">Active</option>
                                 <option value="vacation">On Vacation</option>
                             </select>
                         </div>
-                    </div>
-                    <div class="form-row-4">
                         <div class="form-group">
                             <label>Shift Start Time</label>
                             <input type="time" id="empShiftStart" value="08:00">
@@ -479,8 +664,13 @@
                                 <option value="evening">Evening</option>
                             </select>
                         </div>
+                    </div>
+                    <div class="form-row-4">
                         <div class="form-group">
-                            <label>&nbsp;</label>
+                            <label>Shift Change Date *</label>
+                            <input type="date" id="empShiftChangeDate">
+                        </div>
+                        <div class="form-group" style="display: flex; align-items: flex-end;">
                             <button class="btn btn-success" onclick="addEmployee()" style="width: 100%;">
                                 <i class="fas fa-plus"></i> Add Employee
                             </button>
@@ -512,6 +702,7 @@
                                         <th>Code</th>
                                         <th>Name</th>
                                         <th>Job Title</th>
+                                        <th>Gate</th>
                                         <th>Status</th>
                                         <th>Current Shift</th>
                                         <th>Shift Time</th>
@@ -543,6 +734,16 @@
                                 <option value="all">All Shifts</option>
                                 <option value="morning">Morning Only</option>
                                 <option value="evening">Evening Only</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Gate Filter</label>
+                            <select id="printGateFilter">
+                                <option value="all">All Gates</option>
+                                <option value="mine">Mine Gate</option>
+                                <option value="workshop">Work Shop Gate</option>
+                                <option value="sals">Sals Gate</option>
+                                <option value="camp">Camp Gate</option>
                             </select>
                         </div>
                         <button class="btn btn-warning" onclick="printSchedule()">
@@ -595,8 +796,9 @@
                 document.getElementById('userRole').className = 'role-indicator user';
             }
             
-            // Set default dates for print
+            // Set default dates
             const today = new Date();
+            document.getElementById('empShiftChangeDate').value = formatDate(today);
             document.getElementById('printFromDate').value = formatDate(today);
             document.getElementById('printToDate').value = formatDate(new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000));
             
@@ -618,9 +820,20 @@
             localStorage.setItem('gms_employees', JSON.stringify(employees));
         }
 
-        // Calculate current shift based on 15-day rotation
-        function getCurrentShift(initialShift, startDate) {
-            const start = new Date(startDate);
+        // Get gate display name
+        function getGateName(gate) {
+            const gates = {
+                'mine': 'Mine Gate',
+                'workshop': 'Work Shop Gate',
+                'sals': 'Sals Gate',
+                'camp': 'Camp Gate'
+            };
+            return gates[gate] || gate;
+        }
+
+        // Calculate current shift based on 15-day rotation from shift change date
+        function getCurrentShift(initialShift, shiftChangeDate) {
+            const start = new Date(shiftChangeDate);
             const today = new Date();
             const diffTime = Math.abs(today - start);
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -635,8 +848,8 @@
         }
 
         // Get days until next shift change
-        function getDaysUntilShiftChange(startDate) {
-            const start = new Date(startDate);
+        function getDaysUntilShiftChange(shiftChangeDate) {
+            const start = new Date(shiftChangeDate);
             const today = new Date();
             const diffTime = Math.abs(today - start);
             const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
@@ -653,20 +866,25 @@
                 return;
             }
             
-            // Use first employee's start date as reference
-            const firstEmp = employees[0];
-            const daysUntil = getDaysUntilShiftChange(firstEmp.startDate);
+            // Use first active employee's shift change date as reference
+            const activeEmps = employees.filter(e => e.status === 'active');
+            if (activeEmps.length === 0) {
+                document.getElementById('currentShiftName').textContent = 'All on vacation';
+                document.getElementById('shiftCountdown').textContent = '-- days';
+                return;
+            }
+            
+            const firstEmp = activeEmps[0];
+            const daysUntil = getDaysUntilShiftChange(firstEmp.shiftChangeDate);
             
             // Count morning vs evening
             let morningCount = 0;
             let eveningCount = 0;
             
-            employees.forEach(emp => {
-                if (emp.status === 'active') {
-                    const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
-                    if (currentShift === 'morning') morningCount++;
-                    else eveningCount++;
-                }
+            activeEmps.forEach(emp => {
+                const currentShift = getCurrentShift(emp.initialShift, emp.shiftChangeDate);
+                if (currentShift === 'morning') morningCount++;
+                else eveningCount++;
             });
             
             const dominantShift = morningCount >= eveningCount ? 'Morning' : 'Evening';
@@ -685,7 +903,7 @@
             
             employees.forEach(emp => {
                 if (emp.status === 'active') {
-                    const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                    const currentShift = getCurrentShift(emp.initialShift, emp.shiftChangeDate);
                     if (currentShift === 'morning') morning++;
                     else evening++;
                 }
@@ -702,13 +920,15 @@
             const name = document.getElementById('empName').value.trim();
             const code = document.getElementById('empCode').value.trim();
             const job = document.getElementById('empJob').value;
+            const gate = document.getElementById('empGate').value;
             const status = document.getElementById('empStatus').value;
             const shiftStart = document.getElementById('empShiftStart').value;
             const shiftEnd = document.getElementById('empShiftEnd').value;
             const initialShift = document.getElementById('empInitialShift').value;
+            const shiftChangeDate = document.getElementById('empShiftChangeDate').value;
             
-            if (!name || !code) {
-                alert('Please enter employee name and code!');
+            if (!name || !code || !shiftChangeDate) {
+                alert('Please enter employee name, code, and shift change date!');
                 return;
             }
             
@@ -725,11 +945,12 @@
                 name,
                 code,
                 job,
+                gate,
                 status,
                 shiftStart,
                 shiftEnd,
                 initialShift,
-                startDate: formatDate(new Date()),
+                shiftChangeDate,
                 createdBy: currentUser.email,
                 createdAt: new Date().toISOString()
             });
@@ -746,28 +967,78 @@
             alert('✅ Employee added successfully!');
         }
 
-        // Edit employee
-        function editEmployee(id) {
+        // Open edit modal
+        function openEditModal(id) {
             const employees = getEmployees();
             const emp = employees.find(e => e.id === id);
             if (!emp) return;
             
-            const newName = prompt('Enter new name:', emp.name);
-            if (newName === null) return;
+            document.getElementById('editEmpId').value = emp.id;
+            document.getElementById('editEmpName').value = emp.name;
+            document.getElementById('editEmpCode').value = emp.code;
+            document.getElementById('editEmpJob').value = emp.job;
+            document.getElementById('editEmpGate').value = emp.gate || 'mine';
+            document.getElementById('editEmpStatus').value = emp.status;
+            document.getElementById('editEmpShiftStart').value = emp.shiftStart;
+            document.getElementById('editEmpShiftEnd').value = emp.shiftEnd;
+            document.getElementById('editEmpInitialShift').value = emp.initialShift;
+            document.getElementById('editEmpShiftChangeDate').value = emp.shiftChangeDate;
             
-            const newJob = prompt('Enter job title:', emp.job);
-            if (newJob === null) return;
+            document.getElementById('editModal').classList.add('active');
+        }
+
+        // Close edit modal
+        function closeEditModal() {
+            document.getElementById('editModal').classList.remove('active');
+        }
+
+        // Save employee edit
+        function saveEmployeeEdit() {
+            const id = parseInt(document.getElementById('editEmpId').value);
+            const name = document.getElementById('editEmpName').value.trim();
+            const code = document.getElementById('editEmpCode').value.trim();
+            const job = document.getElementById('editEmpJob').value;
+            const gate = document.getElementById('editEmpGate').value;
+            const status = document.getElementById('editEmpStatus').value;
+            const shiftStart = document.getElementById('editEmpShiftStart').value;
+            const shiftEnd = document.getElementById('editEmpShiftEnd').value;
+            const initialShift = document.getElementById('editEmpInitialShift').value;
+            const shiftChangeDate = document.getElementById('editEmpShiftChangeDate').value;
             
-            const newStatus = confirm('Is employee on vacation?') ? 'vacation' : 'active';
+            if (!name || !code || !shiftChangeDate) {
+                alert('Please fill in all required fields!');
+                return;
+            }
             
-            emp.name = newName || emp.name;
-            emp.job = newJob || emp.job;
-            emp.status = newStatus;
+            const employees = getEmployees();
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            
+            // Check for duplicate code (excluding current employee)
+            const duplicate = employees.find(e => e.code === code && e.id !== id);
+            if (duplicate) {
+                alert('Employee code already exists!');
+                return;
+            }
+            
+            emp.name = name;
+            emp.code = code;
+            emp.job = job;
+            emp.gate = gate;
+            emp.status = status;
+            emp.shiftStart = shiftStart;
+            emp.shiftEnd = shiftEnd;
+            emp.initialShift = initialShift;
+            emp.shiftChangeDate = shiftChangeDate;
+            emp.updatedBy = currentUser.email;
+            emp.updatedAt = new Date().toISOString();
             
             saveEmployees(employees);
+            closeEditModal();
             renderEmployees();
+            updateShiftInfo();
             updateStats();
-            alert('✅ Employee updated!');
+            alert('✅ Employee updated successfully!');
         }
 
         // Delete employee
@@ -797,14 +1068,14 @@
             
             if (employees.length === 0) {
                 cardsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #7f8c8d;"><i class="fas fa-users" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i><p>No employees added yet</p></div>';
-                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px; color: #7f8c8d;">No employees added yet</td></tr>';
+                tableBody.innerHTML = '<tr><td colspan="10" style="text-align: center; padding: 30px; color: #7f8c8d;">No employees added yet</td></tr>';
                 return;
             }
             
             // Render cards
             cardsContainer.innerHTML = employees.map(emp => {
-                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
-                const daysUntil = getDaysUntilShiftChange(emp.startDate);
+                const currentShift = getCurrentShift(emp.initialShift, emp.shiftChangeDate);
+                const daysUntil = getDaysUntilShiftChange(emp.shiftChangeDate);
                 const isVacation = emp.status === 'vacation';
                 
                 return `
@@ -825,6 +1096,10 @@
                                 <span class="value">${emp.job}</span>
                             </div>
                             <div class="detail-row">
+                                <span class="label"><i class="fas fa-door-open"></i> Gate</span>
+                                <span class="value"><span class="gate-badge ${emp.gate || 'mine'}">${getGateName(emp.gate || 'mine')}</span></span>
+                            </div>
+                            <div class="detail-row">
                                 <span class="label"><i class="fas fa-clock"></i> Shift Time</span>
                                 <span class="value">${emp.shiftStart} - ${emp.shiftEnd}</span>
                             </div>
@@ -837,7 +1112,7 @@
                         </div>
                         ${(userRole === 'admin' || userRole === 'hr') ? `
                         <div class="employee-actions">
-                            <button class="btn btn-small btn-primary" onclick="editEmployee(${emp.id})"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-small btn-primary" onclick="openEditModal(${emp.id})"><i class="fas fa-edit"></i> Edit</button>
                             <button class="btn btn-small btn-danger" onclick="deleteEmployee(${emp.id})"><i class="fas fa-trash"></i> Delete</button>
                         </div>
                         ` : ''}
@@ -847,8 +1122,8 @@
             
             // Render table
             tableBody.innerHTML = employees.map((emp, index) => {
-                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
-                const daysUntil = getDaysUntilShiftChange(emp.startDate);
+                const currentShift = getCurrentShift(emp.initialShift, emp.shiftChangeDate);
+                const daysUntil = getDaysUntilShiftChange(emp.shiftChangeDate);
                 const isVacation = emp.status === 'vacation';
                 
                 return `
@@ -857,6 +1132,7 @@
                         <td><strong>${emp.code}</strong></td>
                         <td>${emp.name}</td>
                         <td>${emp.job}</td>
+                        <td><span class="gate-badge ${emp.gate || 'mine'}">${getGateName(emp.gate || 'mine')}</span></td>
                         <td>${isVacation 
                             ? '<span class="shift-badge vacation"><i class="fas fa-umbrella-beach"></i> Vacation</span>'
                             : '<span class="shift-badge" style="background: #e8f5e9; color: #2e7d32;"><i class="fas fa-check"></i> Active</span>'
@@ -866,7 +1142,7 @@
                         <td>${isVacation ? '-' : daysUntil + ' days'}</td>
                         ${(userRole === 'admin' || userRole === 'hr') ? `
                         <td class="action-btns">
-                            <button class="btn-small btn-primary" onclick="editEmployee(${emp.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn-small btn-primary" onclick="openEditModal(${emp.id})"><i class="fas fa-edit"></i></button>
                             <button class="btn-small btn-danger" onclick="deleteEmployee(${emp.id})"><i class="fas fa-trash"></i></button>
                         </td>
                         ` : '<td></td>'}
@@ -880,6 +1156,7 @@
             const fromDate = document.getElementById('printFromDate').value;
             const toDate = document.getElementById('printToDate').value;
             const shiftFilter = document.getElementById('printShiftFilter').value;
+            const gateFilter = document.getElementById('printGateFilter').value;
             
             if (!fromDate || !toDate) {
                 alert('Please select date range!');
@@ -890,11 +1167,15 @@
             let filteredEmployees = employees;
             
             if (shiftFilter !== 'all') {
-                filteredEmployees = employees.filter(emp => {
+                filteredEmployees = filteredEmployees.filter(emp => {
                     if (emp.status === 'vacation') return false;
-                    const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                    const currentShift = getCurrentShift(emp.initialShift, emp.shiftChangeDate);
                     return currentShift === shiftFilter;
                 });
+            }
+            
+            if (gateFilter !== 'all') {
+                filteredEmployees = filteredEmployees.filter(emp => emp.gate === gateFilter);
             }
             
             const printWindow = window.open('', '_blank');
@@ -916,6 +1197,11 @@
                         .vacation { color: #ef6c00; }
                         .header-info { text-align: center; margin-bottom: 30px; }
                         .header-info p { color: #7f8c8d; margin: 5px 0; }
+                        .gate-badge { padding: 3px 8px; border-radius: 10px; font-size: 11px; }
+                        .gate-badge.mine { background: #e8f5e9; color: #2e7d32; }
+                        .gate-badge.workshop { background: #e3f2fd; color: #1565c0; }
+                        .gate-badge.sals { background: #fff3e0; color: #ef6c00; }
+                        .gate-badge.camp { background: #fce4ec; color: #c2185b; }
                     </style>
                 </head>
                 <body>
@@ -923,7 +1209,8 @@
                         <h1>🚛 Gate Management System</h1>
                         <h2>Staff Schedule Report</h2>
                         <p><strong>Period:</strong> ${fromDate} to ${toDate}</p>
-                        <p><strong>Filter:</strong> ${shiftFilter === 'all' ? 'All Shifts' : shiftFilter.charAt(0).toUpperCase() + shiftFilter.slice(1) + ' Shift'}</p>
+                        <p><strong>Shift Filter:</strong> ${shiftFilter === 'all' ? 'All Shifts' : shiftFilter.charAt(0).toUpperCase() + shiftFilter.slice(1) + ' Shift'}</p>
+                        <p><strong>Gate Filter:</strong> ${gateFilter === 'all' ? 'All Gates' : getGateName(gateFilter)}</p>
                         <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
                     </div>
                     <table>
@@ -933,74 +1220,11 @@
                                 <th>Code</th>
                                 <th>Name</th>
                                 <th>Job Title</th>
+                                <th>Gate</th>
                                 <th>Status</th>
                                 <th>Current Shift</th>
                                 <th>Shift Time</th>
                             </tr>
                         </thead>
                         <tbody>
-                            ${filteredEmployees.map((emp, index) => {
-                                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
-                                const isVacation = emp.status === 'vacation';
-                                return `
-                                    <tr>
-                                        <td>${index + 1}</td>
-                                        <td>${emp.code}</td>
-                                        <td>${emp.name}</td>
-                                        <td>${emp.job}</td>
-                                        <td class="${isVacation ? 'vacation' : ''}">${isVacation ? 'On Vacation' : 'Active'}</td>
-                                        <td class="${isVacation ? '' : currentShift}">${isVacation ? '-' : (currentShift === 'morning' ? 'Morning' : 'Evening')}</td>
-                                        <td>${emp.shiftStart} - ${emp.shiftEnd}</td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
-                    <script>window.print();<\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
-
-        // Export to Excel
-        function exportMembersToExcel() {
-            const employees = getEmployees();
-            if (employees.length === 0) {
-                alert('No employees to export!');
-                return;
-            }
-            
-            const data = employees.map((emp, index) => {
-                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
-                const daysUntil = getDaysUntilShiftChange(emp.startDate);
-                
-                return {
-                    'No.': index + 1,
-                    'Employee Code': emp.code,
-                    'Full Name': emp.name,
-                    'Job Title': emp.job,
-                    'Status': emp.status === 'vacation' ? 'On Vacation' : 'Active',
-                    'Current Shift': emp.status === 'vacation' ? '-' : (currentShift === 'morning' ? 'Morning' : 'Evening'),
-                    'Shift Time': `${emp.shiftStart} - ${emp.shiftEnd}`,
-                    'Next Change (Days)': emp.status === 'vacation' ? '-' : daysUntil,
-                    'Start Date': emp.startDate
-                };
-            });
-            
-            const ws = XLSX.utils.json_to_sheet(data);
-            const wb = XLSX.utils.book_new();
-            XLSX.utils.book_append_sheet(wb, ws, 'Staff Schedule');
-            
-            // Set column widths
-            ws['!cols'] = [
-                { wch: 5 }, { wch: 15 }, { wch: 25 }, { wch: 15 },
-                { wch: 12 }, { wch: 15 }, { wch: 18 }, { wch: 18 }, { wch: 12 }
-            ];
-            
-            const date = new Date().toISOString().split('T')[0];
-            XLSX.writeFile(wb, `Staff_Schedule_${date}.xlsx`);
-        }
-    </script>
-</body>
-</html>
+    
