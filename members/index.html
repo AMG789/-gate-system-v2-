@@ -1,0 +1,1006 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members - Gate Management System</title>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- SheetJS for Excel Export -->
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    
+    <link rel="stylesheet" href="/assets/css/main.css">
+    <style>
+        /* Members Page Specific Styles */
+        .shift-info-banner {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 20px 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        
+        .shift-info-banner h3 {
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        .shift-info-banner .current-shift {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 25px;
+            font-size: 14px;
+        }
+        
+        .shift-info-banner .current-shift strong {
+            font-size: 18px;
+            display: block;
+        }
+        
+        .stats-bar {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-pill {
+            background: white;
+            padding: 15px 25px;
+            border-radius: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 120px;
+        }
+        
+        .stat-pill .label {
+            font-size: 12px;
+            color: #7f8c8d;
+            text-transform: uppercase;
+            margin-bottom: 5px;
+        }
+        
+        .stat-pill .value {
+            font-size: 28px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        
+        .stat-pill.active .value { color: #27ae60; }
+        .stat-pill.vacation .value { color: #f39c12; }
+        .stat-pill.morning .value { color: #3498db; }
+        .stat-pill.evening .value { color: #9b59b6; }
+        
+        /* Employee Form */
+        .employee-form {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .employee-form h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        
+        .form-row-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+        
+        .form-row-4 .form-group {
+            margin-bottom: 0;
+        }
+        
+        /* Shift Display */
+        .shift-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 13px;
+            font-weight: 600;
+        }
+        
+        .shift-badge.morning {
+            background: #e3f2fd;
+            color: #1976d2;
+        }
+        
+        .shift-badge.evening {
+            background: #f3e5f5;
+            color: #7b1fa2;
+        }
+        
+        .shift-badge.vacation {
+            background: #fff3e0;
+            color: #ef6c00;
+        }
+        
+        /* Employee Cards */
+        .employees-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+        
+        .employee-card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+            border-left: 4px solid #3498db;
+        }
+        
+        .employee-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.12);
+        }
+        
+        .employee-card.vacation {
+            border-left-color: #f39c12;
+            opacity: 0.8;
+        }
+        
+        .employee-card.evening-shift {
+            border-left-color: #9b59b6;
+        }
+        
+        .employee-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+        
+        .employee-name {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .employee-code {
+            font-size: 12px;
+            color: #7f8c8d;
+            background: #f0f0f0;
+            padding: 4px 10px;
+            border-radius: 12px;
+        }
+        
+        .employee-details {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .detail-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 14px;
+        }
+        
+        .detail-row .label {
+            color: #7f8c8d;
+        }
+        
+        .detail-row .value {
+            color: #2c3e50;
+            font-weight: 500;
+        }
+        
+        .employee-actions {
+            margin-top: 15px;
+            padding-top: 15px;
+            border-top: 1px solid #eee;
+            display: flex;
+            gap: 10px;
+        }
+        
+        /* Table View */
+        .table-view {
+            margin-top: 25px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .view-toggle button {
+            padding: 10px 20px;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 10px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+        
+        .view-toggle button.active {
+            background: #2c3e50;
+            color: white;
+            border-color: #2c3e50;
+        }
+        
+        /* Print Section */
+        .print-section {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 15px;
+            margin-top: 25px;
+        }
+        
+        .print-section h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+        
+        .date-range {
+            display: flex;
+            gap: 15px;
+            align-items: flex-end;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        
+        .date-range .form-group {
+            margin-bottom: 0;
+        }
+        
+        /* Read-only notice */
+        .read-only-notice {
+            background: #e3f2fd;
+            color: #1565c0;
+            padding: 15px 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .read-only-notice i {
+            font-size: 20px;
+        }
+        
+        /* Admin/HR badge */
+        .role-indicator {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        
+        .role-indicator.admin {
+            background: #e74c3c;
+            color: white;
+        }
+        
+        .role-indicator.hr {
+            background: #9b59b6;
+            color: white;
+        }
+        
+        .role-indicator.user {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        /* Next shift change countdown */
+        .countdown-box {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        
+        .countdown-box h4 {
+            font-size: 14px;
+            opacity: 0.9;
+            margin-bottom: 10px;
+        }
+        
+        .countdown-box .countdown {
+            font-size: 32px;
+            font-weight: bold;
+        }
+        
+        .countdown-box .countdown-label {
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 5px;
+        }
+        
+        /* Responsive */
+        @media (max-width: 768px) {
+            .employees-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row-4 {
+                grid-template-columns: 1fr;
+            }
+            
+            .date-range {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="dashboard">
+        <div class="header">
+            <div class="header-content">
+                <div class="header-left">
+                    <div class="header-logo">🚛</div>
+                    <div class="datetime-box">
+                        <div class="date" id="currentDate"></div>
+                        <div class="time" id="currentTime"></div>
+                    </div>
+                </div>
+                <div class="header-right">
+                    <span id="connectionStatus" class="connection-status offline">OFFLINE</span>
+                    <span id="currentUser"></span>
+                    <span id="userRole" class="role-indicator user">USER</span>
+                    <span id="adminBadge" class="admin-badge hidden">ADMIN</span>
+                    <button class="logout-btn" onclick="logout()">Logout</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="nav-tabs">
+                <a href="/fcp/" class="nav-tab">FCP</a>
+                <a href="/fnq/" class="nav-tab">FNQ</a>
+                <a href="/visitors/" class="nav-tab">VISITORS</a>
+                <a href="/gatepass/" class="nav-tab">GATE PASS</a>
+                <a href="/members/" class="nav-tab active">MEMBERS</a>
+                <a href="/history/" class="nav-tab">HISTORY</a>
+                <a href="/users/" class="nav-tab hidden" id="usersTab">USERS</a>
+            </div>
+
+            <!-- Members Section -->
+            <div id="membersSection">
+                <!-- Shift Info Banner -->
+                <div class="shift-info-banner">
+                    <div>
+                        <h3>🔄 Shift Rotation System</h3>
+                        <p style="opacity: 0.9; margin-top: 5px;">Shifts rotate every 15 days automatically</p>
+                    </div>
+                    <div class="current-shift" id="currentShiftInfo">
+                        <span>Current Period</span>
+                        <strong id="currentShiftName">-</strong>
+                    </div>
+                </div>
+                
+                <!-- Countdown to Next Shift Change -->
+                <div class="countdown-box" id="countdownBox">
+                    <h4>⏰ Next Shift Change In</h4>
+                    <div class="countdown" id="shiftCountdown">-- days</div>
+                    <div class="countdown-label">Morning ↔ Evening</div>
+                </div>
+
+                <!-- Statistics -->
+                <div class="stats-bar">
+                    <div class="stat-pill active">
+                        <span class="label">Active Staff</span>
+                        <span class="value" id="activeCount">0</span>
+                    </div>
+                    <div class="stat-pill vacation">
+                        <span class="label">On Vacation</span>
+                        <span class="value" id="vacationCount">0</span>
+                    </div>
+                    <div class="stat-pill morning">
+                        <span class="label">Morning Shift</span>
+                        <span class="value" id="morningCount">0</span>
+                    </div>
+                    <div class="stat-pill evening">
+                        <span class="label">Evening Shift</span>
+                        <span class="value" id="eveningCount">0</span>
+                    </div>
+                </div>
+
+                <!-- Read-only notice for regular users -->
+                <div class="read-only-notice" id="readOnlyNotice">
+                    <i class="fas fa-info-circle"></i>
+                    <span>You are viewing in read-only mode. Contact HR or Admin to make changes.</span>
+                </div>
+
+                <!-- Add Employee Form (Admin/HR only) -->
+                <div class="card employee-form" id="addEmployeeForm" style="display: none;">
+                    <h3>➕ Add New Employee</h3>
+                    <div class="form-row-4">
+                        <div class="form-group">
+                            <label>Full Name *</label>
+                            <input type="text" id="empName" placeholder="e.g. Ahmed Mohamed">
+                        </div>
+                        <div class="form-group">
+                            <label>Employee Code *</label>
+                            <input type="text" id="empCode" placeholder="e.g. EMP001">
+                        </div>
+                        <div class="form-group">
+                            <label>Job Title *</label>
+                            <select id="empJob">
+                                <option value="Gatekeeper">Gatekeeper</option>
+                                <option value="Security">Security</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="HR">HR</option>
+                                <option value="Admin">Admin</option>
+                                <option value="Other">Other</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Status</label>
+                            <select id="empStatus">
+                                <option value="active">Active</option>
+                                <option value="vacation">On Vacation</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="form-row-4">
+                        <div class="form-group">
+                            <label>Shift Start Time</label>
+                            <input type="time" id="empShiftStart" value="08:00">
+                        </div>
+                        <div class="form-group">
+                            <label>Shift End Time</label>
+                            <input type="time" id="empShiftEnd" value="16:00">
+                        </div>
+                        <div class="form-group">
+                            <label>Initial Shift</label>
+                            <select id="empInitialShift">
+                                <option value="morning">Morning</option>
+                                <option value="evening">Evening</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>&nbsp;</label>
+                            <button class="btn btn-success" onclick="addEmployee()" style="width: 100%;">
+                                <i class="fas fa-plus"></i> Add Employee
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- View Toggle -->
+                <div class="view-toggle">
+                    <button class="active" onclick="switchView('cards')" id="cardsViewBtn">
+                        <i class="fas fa-th-large"></i> Cards View
+                    </button>
+                    <button onclick="switchView('table')" id="tableViewBtn">
+                        <i class="fas fa-table"></i> Table View
+                    </button>
+                </div>
+
+                <!-- Employees Cards View -->
+                <div class="employees-grid" id="employeesCards"></div>
+
+                <!-- Employees Table View -->
+                <div class="table-view" id="employeesTableView" style="display: none;">
+                    <div class="card">
+                        <div class="table-container">
+                            <table id="employeesTable">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Code</th>
+                                        <th>Name</th>
+                                        <th>Job Title</th>
+                                        <th>Status</th>
+                                        <th>Current Shift</th>
+                                        <th>Shift Time</th>
+                                        <th>Next Change</th>
+                                        <th id="actionsHeader" style="display: none;">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="employeesTableBody"></tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Print Section -->
+                <div class="print-section">
+                    <h3><i class="fas fa-print"></i> Print Schedule</h3>
+                    <div class="date-range">
+                        <div class="form-group">
+                            <label>From Date</label>
+                            <input type="date" id="printFromDate">
+                        </div>
+                        <div class="form-group">
+                            <label>To Date</label>
+                            <input type="date" id="printToDate">
+                        </div>
+                        <div class="form-group">
+                            <label>Shift Filter</label>
+                            <select id="printShiftFilter">
+                                <option value="all">All Shifts</option>
+                                <option value="morning">Morning Only</option>
+                                <option value="evening">Evening Only</option>
+                            </select>
+                        </div>
+                        <button class="btn btn-warning" onclick="printSchedule()">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button class="btn btn-excel" onclick="exportMembersToExcel()" style="background: #217346; color: white;">
+                            <i class="fas fa-file-excel"></i> Export Excel
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="/assets/js/firebase-config.js"></script>
+    <script src="/assets/js/utils.js"></script>
+    <script>
+        // User role - can be 'admin', 'hr', or 'user'
+        let userRole = 'user';
+        
+        // Check auth state
+        checkAuth((loggedIn) => {
+            if (!loggedIn) {
+                window.location.href = '/index.html';
+                return;
+            }
+            
+            document.getElementById('currentUser').textContent = currentUser.email;
+            
+            // Determine user role
+            if (isAdmin) {
+                userRole = 'admin';
+                document.getElementById('userRole').textContent = 'ADMIN';
+                document.getElementById('userRole').className = 'role-indicator admin';
+                document.getElementById('adminBadge').classList.remove('hidden');
+                document.getElementById('usersTab').classList.remove('hidden');
+                document.getElementById('addEmployeeForm').style.display = 'block';
+                document.getElementById('readOnlyNotice').style.display = 'none';
+                document.getElementById('actionsHeader').style.display = 'table-cell';
+            } else if (currentUser.email.toLowerCase().includes('hr')) {
+                userRole = 'hr';
+                document.getElementById('userRole').textContent = 'HR';
+                document.getElementById('userRole').className = 'role-indicator hr';
+                document.getElementById('addEmployeeForm').style.display = 'block';
+                document.getElementById('readOnlyNotice').style.display = 'none';
+                document.getElementById('actionsHeader').style.display = 'table-cell';
+            } else {
+                userRole = 'user';
+                document.getElementById('userRole').textContent = 'USER';
+                document.getElementById('userRole').className = 'role-indicator user';
+            }
+            
+            // Set default dates for print
+            const today = new Date();
+            document.getElementById('printFromDate').value = formatDate(today);
+            document.getElementById('printToDate').value = formatDate(new Date(today.getTime() + 30 * 24 * 60 * 60 * 1000));
+            
+            renderEmployees();
+            updateShiftInfo();
+            updateStats();
+            
+            // Update countdown every hour
+            setInterval(updateShiftInfo, 3600000);
+        });
+
+        // Get employees data
+        function getEmployees() {
+            return JSON.parse(localStorage.getItem('gms_employees')) || [];
+        }
+
+        // Save employees data
+        function saveEmployees(employees) {
+            localStorage.setItem('gms_employees', JSON.stringify(employees));
+        }
+
+        // Calculate current shift based on 15-day rotation
+        function getCurrentShift(initialShift, startDate) {
+            const start = new Date(startDate);
+            const today = new Date();
+            const diffTime = Math.abs(today - start);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const periods = Math.floor(diffDays / 15);
+            
+            // If even periods, initial shift, if odd, opposite
+            if (periods % 2 === 0) {
+                return initialShift;
+            } else {
+                return initialShift === 'morning' ? 'evening' : 'morning';
+            }
+        }
+
+        // Get days until next shift change
+        function getDaysUntilShiftChange(startDate) {
+            const start = new Date(startDate);
+            const today = new Date();
+            const diffTime = Math.abs(today - start);
+            const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+            const daysInPeriod = diffDays % 15;
+            return 15 - daysInPeriod;
+        }
+
+        // Update shift info banner
+        function updateShiftInfo() {
+            const employees = getEmployees();
+            if (employees.length === 0) {
+                document.getElementById('currentShiftName').textContent = 'No employees';
+                document.getElementById('shiftCountdown').textContent = '-- days';
+                return;
+            }
+            
+            // Use first employee's start date as reference
+            const firstEmp = employees[0];
+            const daysUntil = getDaysUntilShiftChange(firstEmp.startDate);
+            
+            // Count morning vs evening
+            let morningCount = 0;
+            let eveningCount = 0;
+            
+            employees.forEach(emp => {
+                if (emp.status === 'active') {
+                    const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                    if (currentShift === 'morning') morningCount++;
+                    else eveningCount++;
+                }
+            });
+            
+            const dominantShift = morningCount >= eveningCount ? 'Morning' : 'Evening';
+            document.getElementById('currentShiftName').textContent = dominantShift + ' Shift';
+            document.getElementById('shiftCountdown').textContent = daysUntil + ' days';
+        }
+
+        // Update statistics
+        function updateStats() {
+            const employees = getEmployees();
+            const active = employees.filter(e => e.status === 'active').length;
+            const vacation = employees.filter(e => e.status === 'vacation').length;
+            
+            let morning = 0;
+            let evening = 0;
+            
+            employees.forEach(emp => {
+                if (emp.status === 'active') {
+                    const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                    if (currentShift === 'morning') morning++;
+                    else evening++;
+                }
+            });
+            
+            document.getElementById('activeCount').textContent = active;
+            document.getElementById('vacationCount').textContent = vacation;
+            document.getElementById('morningCount').textContent = morning;
+            document.getElementById('eveningCount').textContent = evening;
+        }
+
+        // Add employee
+        function addEmployee() {
+            const name = document.getElementById('empName').value.trim();
+            const code = document.getElementById('empCode').value.trim();
+            const job = document.getElementById('empJob').value;
+            const status = document.getElementById('empStatus').value;
+            const shiftStart = document.getElementById('empShiftStart').value;
+            const shiftEnd = document.getElementById('empShiftEnd').value;
+            const initialShift = document.getElementById('empInitialShift').value;
+            
+            if (!name || !code) {
+                alert('Please enter employee name and code!');
+                return;
+            }
+            
+            const employees = getEmployees();
+            
+            // Check for duplicate code
+            if (employees.find(e => e.code === code)) {
+                alert('Employee code already exists!');
+                return;
+            }
+            
+            employees.push({
+                id: Date.now(),
+                name,
+                code,
+                job,
+                status,
+                shiftStart,
+                shiftEnd,
+                initialShift,
+                startDate: formatDate(new Date()),
+                createdBy: currentUser.email,
+                createdAt: new Date().toISOString()
+            });
+            
+            saveEmployees(employees);
+            
+            // Clear form
+            document.getElementById('empName').value = '';
+            document.getElementById('empCode').value = '';
+            
+            renderEmployees();
+            updateShiftInfo();
+            updateStats();
+            alert('✅ Employee added successfully!');
+        }
+
+        // Edit employee
+        function editEmployee(id) {
+            const employees = getEmployees();
+            const emp = employees.find(e => e.id === id);
+            if (!emp) return;
+            
+            const newName = prompt('Enter new name:', emp.name);
+            if (newName === null) return;
+            
+            const newJob = prompt('Enter job title:', emp.job);
+            if (newJob === null) return;
+            
+            const newStatus = confirm('Is employee on vacation?') ? 'vacation' : 'active';
+            
+            emp.name = newName || emp.name;
+            emp.job = newJob || emp.job;
+            emp.status = newStatus;
+            
+            saveEmployees(employees);
+            renderEmployees();
+            updateStats();
+            alert('✅ Employee updated!');
+        }
+
+        // Delete employee
+        function deleteEmployee(id) {
+            if (!confirm('Are you sure you want to delete this employee?')) return;
+            
+            const employees = getEmployees().filter(e => e.id !== id);
+            saveEmployees(employees);
+            renderEmployees();
+            updateStats();
+            alert('🗑️ Employee deleted!');
+        }
+
+        // Switch view
+        function switchView(view) {
+            document.getElementById('cardsViewBtn').classList.toggle('active', view === 'cards');
+            document.getElementById('tableViewBtn').classList.toggle('active', view === 'table');
+            document.getElementById('employeesCards').style.display = view === 'cards' ? 'grid' : 'none';
+            document.getElementById('employeesTableView').style.display = view === 'table' ? 'block' : 'none';
+        }
+
+        // Render employees
+        function renderEmployees() {
+            const employees = getEmployees();
+            const cardsContainer = document.getElementById('employeesCards');
+            const tableBody = document.getElementById('employeesTableBody');
+            
+            if (employees.length === 0) {
+                cardsContainer.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 50px; color: #7f8c8d;"><i class="fas fa-users" style="font-size: 48px; margin-bottom: 20px; opacity: 0.5;"></i><p>No employees added yet</p></div>';
+                tableBody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 30px; color: #7f8c8d;">No employees added yet</td></tr>';
+                return;
+            }
+            
+            // Render cards
+            cardsContainer.innerHTML = employees.map(emp => {
+                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                const daysUntil = getDaysUntilShiftChange(emp.startDate);
+                const isVacation = emp.status === 'vacation';
+                
+                return `
+                    <div class="employee-card ${isVacation ? 'vacation' : ''} ${currentShift === 'evening' ? 'evening-shift' : ''}">
+                        <div class="employee-header">
+                            <div>
+                                <div class="employee-name">${emp.name}</div>
+                                <span class="employee-code">${emp.code}</span>
+                            </div>
+                            ${isVacation 
+                                ? '<span class="shift-badge vacation"><i class="fas fa-umbrella-beach"></i> Vacation</span>'
+                                : `<span class="shift-badge ${currentShift}"><i class="fas fa-clock"></i> ${currentShift === 'morning' ? 'Morning' : 'Evening'}</span>`
+                            }
+                        </div>
+                        <div class="employee-details">
+                            <div class="detail-row">
+                                <span class="label"><i class="fas fa-briefcase"></i> Job</span>
+                                <span class="value">${emp.job}</span>
+                            </div>
+                            <div class="detail-row">
+                                <span class="label"><i class="fas fa-clock"></i> Shift Time</span>
+                                <span class="value">${emp.shiftStart} - ${emp.shiftEnd}</span>
+                            </div>
+                            ${!isVacation ? `
+                            <div class="detail-row">
+                                <span class="label"><i class="fas fa-exchange-alt"></i> Next Change</span>
+                                <span class="value">${daysUntil} days</span>
+                            </div>
+                            ` : ''}
+                        </div>
+                        ${(userRole === 'admin' || userRole === 'hr') ? `
+                        <div class="employee-actions">
+                            <button class="btn btn-small btn-primary" onclick="editEmployee(${emp.id})"><i class="fas fa-edit"></i> Edit</button>
+                            <button class="btn btn-small btn-danger" onclick="deleteEmployee(${emp.id})"><i class="fas fa-trash"></i> Delete</button>
+                        </div>
+                        ` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            // Render table
+            tableBody.innerHTML = employees.map((emp, index) => {
+                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                const daysUntil = getDaysUntilShiftChange(emp.startDate);
+                const isVacation = emp.status === 'vacation';
+                
+                return `
+                    <tr>
+                        <td>${index + 1}</td>
+                        <td><strong>${emp.code}</strong></td>
+                        <td>${emp.name}</td>
+                        <td>${emp.job}</td>
+                        <td>${isVacation 
+                            ? '<span class="shift-badge vacation"><i class="fas fa-umbrella-beach"></i> Vacation</span>'
+                            : '<span class="shift-badge" style="background: #e8f5e9; color: #2e7d32;"><i class="fas fa-check"></i> Active</span>'
+                        }</td>
+                        <td>${isVacation ? '-' : `<span class="shift-badge ${currentShift}">${currentShift === 'morning' ? 'Morning' : 'Evening'}</span>`}</td>
+                        <td>${emp.shiftStart} - ${emp.shiftEnd}</td>
+                        <td>${isVacation ? '-' : daysUntil + ' days'}</td>
+                        ${(userRole === 'admin' || userRole === 'hr') ? `
+                        <td class="action-btns">
+                            <button class="btn-small btn-primary" onclick="editEmployee(${emp.id})"><i class="fas fa-edit"></i></button>
+                            <button class="btn-small btn-danger" onclick="deleteEmployee(${emp.id})"><i class="fas fa-trash"></i></button>
+                        </td>
+                        ` : '<td></td>'}
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        // Print schedule
+        function printSchedule() {
+            const fromDate = document.getElementById('printFromDate').value;
+            const toDate = document.getElementById('printToDate').value;
+            const shiftFilter = document.getElementById('printShiftFilter').value;
+            
+            if (!fromDate || !toDate) {
+                alert('Please select date range!');
+                return;
+            }
+            
+            const employees = getEmployees();
+            let filteredEmployees = employees;
+            
+            if (shiftFilter !== 'all') {
+                filteredEmployees = employees.filter(emp => {
+                    if (emp.status === 'vacation') return false;
+                    const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                    return currentShift === shiftFilter;
+                });
+            }
+            
+            const printWindow = window.open('', '_blank');
+            
+            printWindow.document.write(`
+                <html>
+                <head>
+                    <title>Staff Schedule - ${fromDate} to ${toDate}</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; padding: 20px; }
+                        h1 { color: #2c3e50; text-align: center; }
+                        h2 { color: #7f8c8d; text-align: center; font-size: 14px; margin-bottom: 20px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+                        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+                        th { background: #2c3e50; color: white; }
+                        tr:nth-child(even) { background: #f9f9f9; }
+                        .morning { color: #1976d2; font-weight: bold; }
+                        .evening { color: #7b1fa2; font-weight: bold; }
+                        .vacation { color: #ef6c00; }
+                        .header-info { text-align: center; margin-bottom: 30px; }
+                        .header-info p { color: #7f8c8d; margin: 5px 0; }
+                    </style>
+                </head>
+                <body>
+                    <div class="header-info">
+                        <h1>🚛 Gate Management System</h1>
+                        <h2>Staff Schedule Report</h2>
+                        <p><strong>Period:</strong> ${fromDate} to ${toDate}</p>
+                        <p><strong>Filter:</strong> ${shiftFilter === 'all' ? 'All Shifts' : shiftFilter.charAt(0).toUpperCase() + shiftFilter.slice(1) + ' Shift'}</p>
+                        <p><strong>Generated:</strong> ${new Date().toLocaleString()}</p>
+                    </div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Code</th>
+                                <th>Name</th>
+                                <th>Job Title</th>
+                                <th>Status</th>
+                                <th>Current Shift</th>
+                                <th>Shift Time</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${filteredEmployees.map((emp, index) => {
+                                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                                const isVacation = emp.status === 'vacation';
+                                return `
+                                    <tr>
+                                        <td>${index + 1}</td>
+                                        <td>${emp.code}</td>
+                                        <td>${emp.name}</td>
+                                        <td>${emp.job}</td>
+                                        <td class="${isVacation ? 'vacation' : ''}">${isVacation ? 'On Vacation' : 'Active'}</td>
+                                        <td class="${isVacation ? '' : currentShift}">${isVacation ? '-' : (currentShift === 'morning' ? 'Morning' : 'Evening')}</td>
+                                        <td>${emp.shiftStart} - ${emp.shiftEnd}</td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                    <script>window.print();<\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
+        }
+
+        // Export to Excel
+        function exportMembersToExcel() {
+            const employees = getEmployees();
+            if (employees.length === 0) {
+                alert('No employees to export!');
+                return;
+            }
+            
+            const data = employees.map((emp, index) => {
+                const currentShift = getCurrentShift(emp.initialShift, emp.startDate);
+                const daysUntil = getDaysUntilShiftChange(emp.startDate);
+                
+                return {
+                    'No.': index + 1,
+                    'Employee Code': emp.code,
+                    'Full Name': emp.name,
+                    'Job Title': emp.job,
+                    'Status': emp.status === 'vacation' ? 'On Vacation' : 'Active',
+                    'Current Shift': emp.status === 'vacation' ? '-' : (currentShift === 'morning' ? 'Morning' : 'Evening'),
+                    'Shift Time': `${emp.shiftStart} - ${emp.shiftEnd}`,
+                    'Next Change (Days)': emp.status === 'vacation' ? '-' : daysUntil,
+                    'Start Date': emp.startDate
+                };
+            });
+            
+            const ws = XLSX.utils.json_to_sheet(data);
+            const wb = XLSX.utils.book_new();
+            XLSX.utils.book_append_sheet(wb, ws, 'Staff Schedule');
+            
+            // Set column widths
+            ws['!cols'] = [
+                { wch: 5 }, { wch: 15 }, { wch: 25 }, { wch: 15 },
+                { wch: 12 }, { wch: 15 }, { wch: 18 }, { wch: 18 }, { wch: 12 }
+            ];
+            
+            const date = new Date().toISOString().split('T')[0];
+            XLSX.writeFile(wb, `Staff_Schedule_${date}.xlsx`);
+        }
+    </script>
+</body>
+</html>
