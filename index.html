@@ -1,1530 +1,204 @@
 <!DOCTYPE html>
-<html lang="en" dir="ltr">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gate Management System</title>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
-    
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f5f5f5; color: #333; line-height: 1.6; }
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-        
-        .login-container { display: flex; justify-content: center; align-items: center; min-height: 100vh; background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
-        .login-box { background: white; padding: 40px; border-radius: 15px; box-shadow: 0 10px 40px rgba(0,0,0,0.3); width: 100%; max-width: 400px; text-align: center; }
-        .logo { font-size: 48px; font-weight: bold; color: #2c3e50; margin-bottom: 10px; letter-spacing: 5px; }
-        .logo span { color: #e74c3c; }
-        .login-box h2 { text-align: center; margin-bottom: 30px; color: #7f8c8d; font-size: 18px; }
-        
-        .form-group { margin-bottom: 20px; text-align: left; }
-        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; color: #555; font-size: 14px; }
-        .form-group input, .form-group select { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; transition: border-color 0.3s; }
-        .form-group input:focus, .form-group select:focus { outline: none; border-color: #3498db; }
-        
-        .btn { padding: 12px 24px; background: #3498db; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 14px; font-weight: 600; transition: all 0.3s; }
-        .btn:hover { background: #2980b9; transform: translateY(-2px); }
-        .btn-secondary { background: #95a5a6; }
-        .btn-secondary:hover { background: #7f8c8d; }
-        .btn-success { background: #27ae60; }
-        .btn-success:hover { background: #229954; }
-        .btn-danger { background: #e74c3c; }
-        .btn-danger:hover { background: #c0392b; }
-        .btn-warning { background: #f39c12; }
-        .btn-warning:hover { background: #e67e22; }
-        .btn-info { background: #9b59b6; }
-        .btn-info:hover { background: #8e44ad; }
-        .btn-dark { background: #2c3e50; }
-        .btn-dark:hover { background: #1a252f; }
-        
-        .error-message { color: #e74c3c; text-align: center; margin-top: 10px; font-size: 14px; }
-        
-        .header { background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%); color: white; padding: 15px 0; margin-bottom: 30px; }
-        .header-content { display: flex; justify-content: space-between; align-items: center; max-width: 1200px; margin: 0 auto; padding: 0 20px; flex-wrap: wrap; gap: 15px; }
-        .header-left { display: flex; align-items: center; gap: 20px; }
-        .header-logo { font-size: 24px; font-weight: bold; letter-spacing: 3px; }
-        .header-logo span { color: #e74c3c; }
-        .datetime-box { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 8px; text-align: center; }
-        .datetime-box .date { font-size: 18px; font-weight: bold; color: #fff; }
-        .datetime-box .time { font-size: 14px; color: #bdc3c7; }
-        .header-right { display: flex; align-items: center; gap: 15px; }
-        .connection-status { padding: 5px 12px; border-radius: 15px; font-size: 11px; font-weight: bold; }
-        .online { background: #27ae60; }
-        .offline { background: #e74c3c; }
-        .logout-btn { background: #e74c3c; padding: 8px 20px; border-radius: 8px; border: none; color: white; cursor: pointer; font-weight: 600; }
-        .logout-btn:hover { background: #c0392b; }
-        
-        .nav-tabs { display: flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; background: white; padding: 10px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .nav-tab { padding: 12px 24px; background: #ecf0f1; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; color: #555; transition: all 0.3s; }
-        .nav-tab:hover { background: #d5dbdb; }
-        .nav-tab.active { background: #2c3e50; color: white; }
-        
-        .card { background: white; border-radius: 10px; padding: 25px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        .card h2 { margin-bottom: 20px; color: #2c3e50; border-bottom: 2px solid #ecf0f1; padding-bottom: 10px; font-size: 18px; }
-        .card h3 { margin: 20px 0 15px; color: #27ae60; font-size: 16px; border-left: 4px solid #27ae60; padding-left: 10px; }
-        
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 15px; }
-        .form-row .form-group { margin-bottom: 0; }
-        .form-row .form-group input, .form-row .form-group select { background: #f8f9fa; }
-        .form-row .form-group input[readonly] { background: #e9ecef; cursor: not-allowed; }
-        
-        .btn-group { display: flex; gap: 10px; margin-top: 15px; flex-wrap: wrap; }
-        .btn-group .btn { flex: 1; min-width: 150px; }
-        
-        .table-container { overflow-x: auto; margin-top: 15px; }
-        table { width: 100%; border-collapse: collapse; font-size: 14px; }
-        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ecf0f1; }
-        th { background: #2c3e50; color: white; font-weight: 600; }
-        tr:hover { background: #f8f9fa; }
-        .status-in { color: #27ae60; font-weight: bold; }
-        .status-out { color: #e74c3c; font-weight: bold; }
-        .status-pending { color: #f39c12; font-weight: bold; }
-        
-        .action-btns { display: flex; gap: 5px; }
-        .btn-small { padding: 6px 12px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; color: white; }
-        
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 1000; justify-content: center; align-items: center; }
-        .modal.active { display: flex; }
-        .modal-content { background: white; padding: 30px; border-radius: 15px; width: 90%; max-width: 400px; }
-        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .modal-header h3 { margin: 0; color: #2c3e50; }
-        .close-modal { background: none; border: none; font-size: 24px; cursor: pointer; color: #7f8c8d; }
-        
-        .hidden { display: none !important; }
-        .admin-badge { background: #e74c3c; color: white; padding: 4px 12px; border-radius: 15px; font-size: 11px; font-weight: bold; }
-        
-        .search-box { margin-bottom: 15px; }
-        .search-box input { width: 100%; padding: 12px; border: 1px solid #ddd; border-radius: 8px; font-size: 14px; }
-        
-        .export-btns { margin-top: 15px; display: flex; gap: 10px; justify-content: flex-end; }
-        
-        .history-filter { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .history-filter .form-group { margin-bottom: 0; }
-        
-        .history-calendar { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px; margin-top: 20px; }
-        .history-date-card { background: white; border: 2px solid #ecf0f1; border-radius: 10px; padding: 20px; cursor: pointer; transition: all 0.3s; }
-        .history-date-card:hover { border-color: #3498db; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .history-date-card.active { border-color: #3498db; background: #ebf5fb; }
-        .history-date-card h4 { color: #2c3e50; margin-bottom: 10px; }
-        .history-date-card .stats { display: flex; gap: 15px; flex-wrap: wrap; font-size: 12px; color: #7f8c8d; }
-        .history-date-card .stats span { background: #ecf0f1; padding: 3px 8px; border-radius: 4px; }
-        
-        .empty-state { text-align: center; padding: 40px; color: #7f8c8d; }
-        
-        @media print {
-            .header, .nav-tabs, .action-btns, .btn, .export-btns, .form-row { display: none !important; }
-            .card { box-shadow: none; border: 1px solid #ddd; }
-            body { background: white; }
-            .print-only { display: block !important; }
-        }
-        @media (max-width: 768px) {
-            .header-content { flex-direction: column; text-align: center; }
-            .nav-tabs { justify-content: center; }
-            .btn-group { flex-direction: column; }
-            .btn-group .btn { width: 100%; }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login - Facility Management System</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/assets/css/main.css">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 </head>
 <body>
-    <!-- Login Page -->
-    <div id="loginPage" class="login-container">
-        <div class="login-box">
-            <div class="logo">🚛</div>
-            <h2>GATE MANAGEMENT SYSTEM</h2>
-            <form id="loginForm">
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="email" required placeholder="Enter your email">
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="password" required placeholder="Enter your password">
-                </div>
-                <button type="submit" class="btn" style="width: 100%;">Login</button>
-            </form>
-            <div id="loginError" class="error-message"></div>
+  <div class="login-page">
+    <div class="login-card">
+      <div class="login-header">
+        <div class="login-logo">
+          <i class="fas fa-building"></i>
         </div>
+        <h1 class="login-title">Welcome Back</h1>
+        <p class="login-subtitle">Sign in to access the Facility Management System</p>
+      </div>
+      
+      <form class="login-form" id="login-form">
+        <div class="form-group">
+          <label class="form-label" for="email">Email Address</label>
+          <input 
+            type="email" 
+            id="email" 
+            class="form-input" 
+            placeholder="Enter your email"
+            required
+            autocomplete="email"
+          >
+        </div>
+        
+        <div class="form-group">
+          <label class="form-label" for="password">Password</label>
+          <input 
+            type="password" 
+            id="password" 
+            class="form-input" 
+            placeholder="Enter your password"
+            required
+            autocomplete="current-password"
+          >
+        </div>
+        
+        <div class="form-group" style="display: flex; justify-content: space-between; align-items: center;">
+          <label style="display: flex; align-items: center; gap: 0.5rem; font-size: 0.875rem; cursor: pointer;">
+            <input type="checkbox" id="remember-me" style="cursor: pointer;">
+            Remember me
+          </label>
+          <a href="#" id="forgot-password" style="font-size: 0.875rem; color: var(--primary-color);">Forgot password?</a>
+        </div>
+        
+        <button type="submit" class="btn btn-primary login-btn" id="login-btn">
+          <i class="fas fa-sign-in-alt"></i>
+          <span>Sign In</span>
+        </button>
+      </form>
+      
+      <div class="login-footer">
+        <p>Don't have an account? Contact your administrator</p>
+      </div>
     </div>
+  </div>
 
-    <!-- Admin Login Modal (for creating new accounts) -->
-    <div id="adminLoginModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3>Admin Authentication Required</h3>
-                <button class="close-modal" onclick="closeAdminLoginModal()">&times;</button>
-            </div>
-            <p style="margin-bottom: 15px; color: #7f8c8d;">Please login with admin credentials to create new accounts.</p>
-            <form id="adminLoginForm">
-                <div class="form-group">
-                    <label>Admin Email</label>
-                    <input type="email" id="adminAuthEmail" required>
-                </div>
-                <div class="form-group">
-                    <label>Admin Password</label>
-                    <input type="password" id="adminAuthPassword" required>
-                </div>
-                <button type="submit" class="btn btn-dark" style="width: 100%;">Verify Admin</button>
-            </form>
-        </div>
-    </div>
-
-    <!-- Main Dashboard -->
-    <div id="dashboard" class="hidden">
-        <div class="header">
-            <div class="header-content">
-                <div class="header-left">
-                    <div class="header-logo">🚛</div>
-                    <div class="datetime-box">
-                        <div class="date" id="currentDate"></div>
-                        <div class="time" id="currentTime"></div>
-                    </div>
-                </div>
-                <div class="header-right">
-                    <span id="connectionStatus" class="connection-status offline">OFFLINE</span>
-                    <span id="currentUser"></span>
-                    <span id="adminBadge" class="admin-badge hidden">ADMIN</span>
-                    <button class="logout-btn" onclick="logout()">Logout</button>
-                </div>
-            </div>
-        </div>
-
-        <div class="container">
-            <div class="nav-tabs">
-                <button class="nav-tab active" onclick="showSection('fcp')">FCP</button>
-                <button class="nav-tab" onclick="showSection('fnq')">FNQ</button>
-                <button class="nav-tab" onclick="showSection('visitors')">VISITORS</button>
-                <button class="nav-tab" onclick="showSection('gatepass')">GATE PASS</button>
-                <button class="nav-tab" onclick="showSection('history')">HISTORY</button>
-                <button class="nav-tab hidden" id="usersTab" onclick="showSection('users')">USERS</button>
-            </div>
-
-            <!-- FCP Section -->
-            <div id="fcpSection" class="section">
-                <div class="card">
-                    <h2>FCP - Truck Entry/Exit</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Truck Number *</label>
-                            <input type="text" id="fcpTruckNo" placeholder="29491">
-                        </div>
-                        <div class="form-group">
-                            <label>Gate Pass Number</label>
-                            <input type="text" id="fcpGP" placeholder="Required for exit only">
-                        </div>
-                        <div class="form-group">
-                            <label>Current Time</label>
-                            <input type="text" id="fcpTime" readonly>
-                        </div>
-                    </div>
-                    <div class="btn-group">
-                        <button class="btn btn-success" onclick="recordFCP('in')">Record Entry (IN)</button>
-                        <button class="btn btn-danger" onclick="recordFCP('out')">Record Exit (OUT)</button>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h2>Daily Record (Today) - Read Only</h2>
-                    <div class="table-container">
-                        <table id="fcpTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Truck No.</th>
-                                    <th>GP No.</th>
-                                    <th>Time In</th>
-                                    <th>Time Out</th>
-                                    <th>Status</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fcpTableBody"></tbody>
-                        </table>
-                    </div>
-                    <div class="export-btns">
-                        <button class="btn btn-warning" onclick="printReport('fcp')">Print Report</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- FNQ Section -->
-            <div id="fnqSection" class="section hidden">
-                <div class="card">
-                    <h2>FNQ - Quarry Entry</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Truck Number *</label>
-                            <input type="text" id="fnqTruckNo" placeholder="e.g. 24198">
-                        </div>
-                        <div class="form-group">
-                            <label>Gate Pass No. *</label>
-                            <input type="text" id="fnqGP" placeholder="e.g. GP-001">
-                        </div>
-                        <div class="form-group">
-                            <label>Driver Name</label>
-                            <input type="text" id="fnqDriver" placeholder="Optional">
-                        </div>
-                        <div class="form-group">
-                            <label>Entry Time</label>
-                            <input type="text" id="fnqTime" readonly>
-                        </div>
-                    </div>
-                    <button class="btn btn-success" onclick="recordFNQ()">Record Entry</button>
-                </div>
-
-                <div class="card">
-                    <h2>Inside Quarry (Editable)</h2>
-                    <div class="table-container">
-                        <table id="fnqInsideTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Truck No.</th>
-                                    <th>Gate Pass</th>
-                                    <th>Driver</th>
-                                    <th>Entry Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fnqInsideBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Completed Exits (Read Only)</h3>
-                    <div class="table-container">
-                        <table id="fnqCompletedTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Truck No.</th>
-                                    <th>Gate Pass</th>
-                                    <th>Time In</th>
-                                    <th>Time Out</th>
-                                    <th>Duration</th>
-                                </tr>
-                            </thead>
-                            <tbody id="fnqCompletedBody"></tbody>
-                        </table>
-                    </div>
-                    <div class="export-btns">
-                        <button class="btn btn-warning" onclick="printReport('fnq')">Print Report</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- VISITORS Section -->
-            <div id="visitorsSection" class="section hidden">
-                <div class="card">
-                    <h2>Visitor Entry</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Visitor Name *</label>
-                            <input type="text" id="visitorName" placeholder="e.g. Ahmed Ali">
-                        </div>
-                        <div class="form-group">
-                            <label>Company Name *</label>
-                            <input type="text" id="visitorCompany" placeholder="e.g. Al Khaiber">
-                        </div>
-                        <div class="form-group">
-                            <label>Vehicle Number</label>
-                            <input type="text" id="visitorVehicle" placeholder="e.g. 12345-A">
-                        </div>
-                        <div class="form-group">
-                            <label>Destination *</label>
-                            <select id="visitorDestination">
-                                <option value="FNQ">FNQ</option>
-                                <option value="FCP">FCP</option>
-                                <option value="RINO">RINO</option>
-                                <option value="ZINATH">ZINATH</option>
-                                <option value="FRIMA">FRIMA</option>
-                                <option value="MEETING">MEETING</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Purpose</label>
-                            <input type="text" id="visitorPurpose" placeholder="e.g. Delivery">
-                        </div>
-                        <div class="form-group">
-                            <label>Entry Time</label>
-                            <input type="text" id="visitorTime" readonly>
-                        </div>
-                    </div>
-                    <button class="btn btn-success" onclick="recordVisitor()">Record Entry</button>
-                </div>
-
-                <div class="card">
-                    <h2>Current Visitors (Editable)</h2>
-                    <div class="table-container">
-                        <table id="visitorsInsideTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Company</th>
-                                    <th>Vehicle</th>
-                                    <th>Destination</th>
-                                    <th>Entry Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="visitorsInsideBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Completed Visits (Read Only)</h3>
-                    <div class="table-container">
-                        <table id="visitorsCompletedTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>Name</th>
-                                    <th>Company</th>
-                                    <th>Destination</th>
-                                    <th>Time In</th>
-                                    <th>Time Out</th>
-                                    <th>Duration</th>
-                                </tr>
-                            </thead>
-                            <tbody id="visitorsCompletedBody"></tbody>
-                        </table>
-                    </div>
-                    <div class="export-btns">
-                        <button class="btn btn-warning" onclick="printReport('visitors')">Print Report</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- GATE PASS Section -->
-            <div id="gatepassSection" class="section hidden">
-                <div class="card">
-                    <h2>Gate Pass Issue</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label>Gate Pass Number *</label>
-                            <input type="text" id="gpNumber" placeholder="e.g. GP-001">
-                        </div>
-                        <div class="form-group">
-                            <label>Department *</label>
-                            <select id="gpDepartment">
-                                <option value="FCP">FCP</option>
-                                <option value="FNQ">FNQ</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>Issue Time</label>
-                            <input type="text" id="gpTime" readonly>
-                        </div>
-                    </div>
-                    <button class="btn btn-success" onclick="issueGatePass()">Issue Gate Pass (OUT)</button>
-                </div>
-
-                <div class="card">
-                    <h2>Active Gate Pass (OUT)</h2>
-                    <div class="table-container">
-                        <table id="gpActiveTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>GP Number</th>
-                                    <th>Department</th>
-                                    <th>Issue Time</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="gpActiveBody"></tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <div class="card">
-                    <h3>Returned Gate Pass (Read Only)</h3>
-                    <div class="table-container">
-                        <table id="gpReturnedTable">
-                            <thead>
-                                <tr>
-                                    <th>#</th>
-                                    <th>GP Number</th>
-                                    <th>Department</th>
-                                    <th>Issue Time</th>
-                                    <th>Return Time</th>
-                                </tr>
-                            </thead>
-                            <tbody id="gpReturnedBody"></tbody>
-                        </table>
-                    </div>
-                    <div class="export-btns">
-                        <button class="btn btn-warning" onclick="printReport('gatepass')">Print Report</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- HISTORY Section -->
-            <div id="historySection" class="section hidden">
-                <div class="card">
-                    <h2>History Search</h2>
-                    <div class="history-filter">
-                        <div class="form-group">
-                            <label>Department</label>
-                            <select id="historyDept">
-                                <option value="all">All Departments</option>
-                                <option value="fcp">FCP</option>
-                                <option value="fnq">FNQ</option>
-                                <option value="visitors">Visitors</option>
-                                <option value="gatepass">Gate Pass</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label>From Date</label>
-                            <input type="date" id="historyFromDate">
-                        </div>
-                        <div class="form-group">
-                            <label>From Time</label>
-                            <input type="time" id="historyFromTime" value="00:00">
-                        </div>
-                        <div class="form-group">
-                            <label>To Date</label>
-                            <input type="date" id="historyToDate">
-                        </div>
-                        <div class="form-group">
-                            <label>To Time</label>
-                            <input type="time" id="historyToTime" value="23:59">
-                        </div>
-                    </div>
-                    <button class="btn btn-primary" onclick="searchHistory()">Find Records</button>
-                </div>
-
-                <div class="card" id="historyResults" style="display: none;">
-                    <h2>Search Results</h2>
-                    <div class="table-container" id="historyResultsContainer"></div>
-                    <div class="export-btns">
-                        <button class="btn btn-warning" onclick="printHistoryResults()">Print Report</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- USERS Section (Admin Only) -->
-            <div id="usersSection" class="section hidden">
-                <div class="card">
-                    <h2>Create New User</h2>
-                    <form id="addUserForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Email *</label>
-                                <input type="email" id="newUserEmail" required placeholder="user@example.com">
-                            </div>
-                            <div class="form-group">
-                                <label>Password *</label>
-                                <input type="password" id="newUserPassword" required minlength="6">
-                            </div>
-                            <div class="form-group">
-                                <label>Role</label>
-                                <select id="newUserRole">
-                                    <option value="user">User</option>
-                                    <option value="admin">Admin</option>
-                                </select>
-                            </div>
-                        </div>
-                        <button type="submit" class="btn btn-success">Create User</button>
-                    </form>
-                </div>
-
-                <div class="card">
-                    <h2>System Users</h2>
-                    <div class="table-container">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Created Date</th>
-                                </tr>
-                            </thead>
-                            <tbody id="usersTable"></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        // Firebase Configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyBVho_BuuRkfRbuQzW2PWDYnJxxmC5yyAc",
-            authDomain: "gate-management-system-44cf5.firebaseapp.com",
-            projectId: "gate-management-system-44cf5",
-            storageBucket: "gate-management-system-44cf5.appspot.com",
-            messagingSenderId: "859920522798",
-            appId: "1:859920522798:web:d3ea86a373ce25ab0dc9bf"
-        };
-
-        // Initialize Firebase
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-
-        // Master Admin Email
-        const MASTER_ADMIN = "Aswany177@gmail.com";
-
-        // Global State
-        let currentUser = null;
-        let isAdmin = false;
-        let isOnline = navigator.onLine;
-        let currentDate = new Date();
-        let pendingAction = null;
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            setupNetworkListeners();
-            updateDateTime();
-            setInterval(updateDateTime, 1000);
-            setDefaultTimes();
-            checkDayChange();
-            setInterval(checkDayChange, 60000); // Check every minute
-            
-            // Set default history dates
-            document.getElementById('historyFromDate').value = formatDate(new Date());
-            document.getElementById('historyToDate').value = formatDate(new Date());
-            
-            // Check auth state
-            auth.onAuthStateChanged(async (user) => {
-                if (user) {
-                    currentUser = user;
-                    isAdmin = user.email.toLowerCase() === MASTER_ADMIN.toLowerCase();
-                    showDashboard();
-                } else {
-                    showLogin();
-                }
-            });
+  <!-- Firebase Config -->
+  <script src="/assets/js/firebase-config.js"></script>
+  
+  <!-- Auth Guard (for redirecting logged-in users) -->
+  <script src="/assets/js/auth-guard.js"></script>
+  
+  <script>
+    (function() {
+      'use strict';
+      
+      const loginForm = document.getElementById('login-form');
+      const loginBtn = document.getElementById('login-btn');
+      const forgotPasswordLink = document.getElementById('forgot-password');
+      
+      // Handle login form submission
+      loginForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value;
+        const rememberMe = document.getElementById('remember-me').checked;
+        
+        // Show loading state
+        loginBtn.disabled = true;
+        loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Signing in...</span>';
+        
+        try {
+          // Set persistence based on remember me
+          const persistence = rememberMe 
+            ? firebase.auth.Auth.Persistence.LOCAL 
+            : firebase.auth.Auth.Persistence.SESSION;
+          
+          await firebase.auth().setPersistence(persistence);
+          
+          // Sign in
+          const userCredential = await firebase.auth().signInWithEmailAndPassword(email, password);
+          const user = userCredential.user;
+          
+          console.log('Login successful:', user.email);
+          
+          // Get redirect URL from query params
+          const urlParams = new URLSearchParams(window.location.search);
+          const redirectUrl = urlParams.get('redirect') || '/dashboard/';
+          
+          // Redirect to dashboard or requested page
+          window.location.href = decodeURIComponent(redirectUrl);
+          
+        } catch (error) {
+          console.error('Login error:', error);
+          
+          // Show error message
+          let errorMessage = 'Login failed. Please try again.';
+          
+          switch (error.code) {
+            case 'auth/invalid-email':
+              errorMessage = 'Invalid email address.';
+              break;
+            case 'auth/user-disabled':
+              errorMessage = 'This account has been disabled.';
+              break;
+            case 'auth/user-not-found':
+              errorMessage = 'No account found with this email.';
+              break;
+            case 'auth/wrong-password':
+              errorMessage = 'Incorrect password.';
+              break;
+            case 'auth/too-many-requests':
+              errorMessage = 'Too many failed attempts. Please try again later.';
+              break;
+          }
+          
+          alert(errorMessage);
+          
+          // Reset button
+          loginBtn.disabled = false;
+          loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i><span>Sign In</span>';
+        }
+      });
+      
+      // Handle forgot password
+      forgotPasswordLink.addEventListener('click', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('email').value.trim();
+        
+        if (!email) {
+          alert('Please enter your email address first.');
+          document.getElementById('email').focus();
+          return;
+        }
+        
+        try {
+          await firebase.auth().sendPasswordResetEmail(email);
+          alert('Password reset email sent. Please check your inbox.');
+        } catch (error) {
+          console.error('Password reset error:', error);
+          alert('Failed to send password reset email. Please try again.');
+        }
+      });
+      
+      // Check if Firebase is properly configured
+      if (firebaseConfig.apiKey === 'YOUR_API_KEY') {
+        console.warn('Firebase not configured. Please update firebase-config.js with your actual Firebase credentials.');
+        
+        // For demo purposes, allow login with any credentials
+        loginForm.addEventListener('submit', (e) => {
+          e.preventDefault();
+          
+          const email = document.getElementById('email').value.trim();
+          
+          // Demo login - store user in session
+          sessionStorage.setItem('demoUser', JSON.stringify({
+            email: email,
+            uid: 'demo-user-id',
+            displayName: email.split('@')[0]
+          }));
+          
+          alert('Demo mode: Logging in without Firebase. Please configure Firebase for production use.');
+          window.location.href = '/dashboard/';
         });
-
-        // Date/Time Functions
-        function formatDate(date) {
-            const d = new Date(date);
-            const day = String(d.getDate()).padStart(2, '0');
-            const month = String(d.getMonth() + 1).padStart(2, '0');
-            const year = d.getFullYear();
-            return `${year}-${month}-${day}`;
-        }
-        
-        function formatDateDisplay(dateStr) {
-            const parts = dateStr.split('-');
-            return `${parts[2]}/${parts[1]}/${parts[0]}`;
-        }
-        
-        function updateDateTime() {
-            const now = new Date();
-            const day = String(now.getDate()).padStart(2, '0');
-            const month = String(now.getMonth() + 1).padStart(2, '0');
-            const year = now.getFullYear();
-            
-            document.getElementById('currentDate').textContent = `${day}/${month}/${year}`;
-            document.getElementById('currentTime').textContent = now.toLocaleTimeString('en-US');
-            
-            // Update readonly time fields
-            const timeStr = now.toTimeString().slice(0, 5);
-            ['fcpTime', 'fnqTime', 'visitorTime', 'gpTime'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = timeStr;
-            });
-        }
-        
-        function setDefaultTimes() {
-            const timeStr = new Date().toTimeString().slice(0, 5);
-            ['fcpTime', 'fnqTime', 'visitorTime', 'gpTime'].forEach(id => {
-                const el = document.getElementById(id);
-                if (el) el.value = timeStr;
-            });
-        }
-
-        // Day Change Check (24-hour system: 12:00 AM - 11:59 PM)
-        function checkDayChange() {
-            const now = new Date();
-            const today = formatDate(now);
-            const lastDate = localStorage.getItem('gms_lastDate');
-            
-            if (lastDate && lastDate !== today) {
-                // Day changed - archive old data
-                archiveDayData(lastDate);
-            }
-            localStorage.setItem('gms_lastDate', today);
-        }
-        
-        function archiveDayData(date) {
-            const types = ['fcp', 'fnq', 'visitors', 'gatepass'];
-            types.forEach(type => {
-                const data = localStorage.getItem(`gms_${type}_${date}`);
-                if (data) {
-                    localStorage.setItem(`gms_history_${type}_${date}`, data);
-                    localStorage.removeItem(`gms_${type}_${date}`);
-                }
-            });
-        }
-
-        // Data Functions
-        function getTodayData(type) {
-            const today = formatDate(new Date());
-            const key = `gms_${type}_${today}`;
-            return JSON.parse(localStorage.getItem(key)) || [];
-        }
-        
-        function saveTodayData(type, data) {
-            const today = formatDate(new Date());
-            const key = `gms_${type}_${today}`;
-            localStorage.setItem(key, JSON.stringify(data));
-        }
-        
-        function getHistoryData(type, date) {
-            const key = `gms_history_${type}_${date}`;
-            return JSON.parse(localStorage.getItem(key)) || [];
-        }
-
-        // Auth Functions
-        function showLogin() {
-            document.getElementById('loginPage').classList.remove('hidden');
-            document.getElementById('dashboard').classList.add('hidden');
-        }
-        
-        function showDashboard() {
-            document.getElementById('loginPage').classList.add('hidden');
-            document.getElementById('dashboard').classList.remove('hidden');
-            document.getElementById('currentUser').textContent = currentUser.email;
-            
-            if (isAdmin) {
-                document.getElementById('adminBadge').classList.remove('hidden');
-                document.getElementById('usersTab').classList.remove('hidden');
-                loadUsers();
-            }
-            
-            renderAllTables();
-        }
-        
-        document.getElementById('loginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            try {
-                await auth.signInWithEmailAndPassword(email, password);
-            } catch (error) {
-                document.getElementById('loginError').textContent = error.message;
-            }
-        });
-        
-        async function logout() {
-            await auth.signOut();
-            currentUser = null;
-            isAdmin = false;
-            showLogin();
-        }
-
-        // Admin Authentication for creating accounts
-        function showAdminLoginModal() {
-            document.getElementById('adminLoginModal').classList.add('active');
-        }
-        
-        function closeAdminLoginModal() {
-            document.getElementById('adminLoginModal').classList.remove('active');
-        }
-        
-        document.getElementById('adminLoginForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('adminAuthEmail').value;
-            const password = document.getElementById('adminAuthPassword').value;
-            
-            if (email.toLowerCase() !== MASTER_ADMIN.toLowerCase()) {
-                alert('Only master admin can create new accounts!');
-                return;
-            }
-            
-            try {
-                // Sign in with admin credentials
-                await auth.signInWithEmailAndPassword(email, password);
-                closeAdminLoginModal();
-                
-                // Execute pending action
-                if (pendingAction === 'createUser') {
-                    createNewUser();
-                }
-            } catch (error) {
-                alert('Invalid admin credentials!');
-            }
-        });
-
-        // Network
-        function setupNetworkListeners() {
-            window.addEventListener('online', () => { 
-                isOnline = true; 
-                document.getElementById('connectionStatus').textContent = 'ONLINE';
-                document.getElementById('connectionStatus').className = 'connection-status online';
-            });
-            window.addEventListener('offline', () => { 
-                isOnline = false; 
-                document.getElementById('connectionStatus').textContent = 'OFFLINE';
-                document.getElementById('connectionStatus').className = 'connection-status offline';
-            });
-        }
-
-        // Navigation
-        function showSection(sectionId) {
-            document.querySelectorAll('.section').forEach(s => s.classList.add('hidden'));
-            document.querySelectorAll('.nav-tab').forEach(b => b.classList.remove('active'));
-            
-            document.getElementById(sectionId + 'Section').classList.remove('hidden');
-            event.target.classList.add('active');
-            
-            if (sectionId === 'users' && isAdmin) loadUsers();
-        }
-
-        // FCP Functions
-        function recordFCP(type) {
-            const truckNo = document.getElementById('fcpTruckNo').value.trim();
-            const gp = document.getElementById('fcpGP').value.trim();
-            const time = document.getElementById('fcpTime').value;
-            
-            if (!truckNo) {
-                alert('Please enter truck number!');
-                return;
-            }
-            
-            if (type === 'out' && !gp) {
-                alert('Gate Pass number is required for exit!');
-                return;
-            }
-            
-            const data = getTodayData('fcp');
-            
-            if (type === 'in') {
-                // Record entry
-                data.push({
-                    id: Date.now(),
-                    truckNo,
-                    gp: gp || '-',
-                    timeIn: time,
-                    timeOut: '-',
-                    status: 'inside',
-                    createdBy: currentUser.email
-                });
-                alert('Entry recorded!');
-            } else {
-                // Record exit - find matching entry or create new
-                const existing = data.find(r => r.truckNo === truckNo && r.status === 'inside');
-                if (existing) {
-                    existing.timeOut = time;
-                    existing.gp = gp;
-                    existing.status = 'completed';
-                } else {
-                    data.push({
-                        id: Date.now(),
-                        truckNo,
-                        gp,
-                        timeIn: '-',
-                        timeOut: time,
-                        status: 'exit_only',
-                        createdBy: currentUser.email
-                    });
-                }
-                alert('Exit recorded!');
-            }
-            
-            saveTodayData('fcp', data);
-            document.getElementById('fcpTruckNo').value = '';
-            document.getElementById('fcpGP').value = '';
-            renderFCPTable();
-        }
-        
-        function renderFCPTable() {
-            const data = getTodayData('fcp');
-            const tbody = document.getElementById('fcpTableBody');
-            
-            if (data.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="6" style="color: #7f8c8d; text-align: center; padding: 30px;">No records today</td></tr>';
-                return;
-            }
-            
-            tbody.innerHTML = data.map((item, index) => `
-                <tr>
-                    <td>${index + 1}</td>
-                    <td>${item.truckNo}</td>
-                    <td>${item.gp}</td>
-                    <td>${item.timeIn}</td>
-                    <td>${item.timeOut}</td>
-                    <td class="${item.status === 'inside' ? 'status-in' : 'status-out'}">${item.status === 'inside' ? 'INSIDE' : 'OUT'}</td>
-                </tr>
-            `).join('');
-        }
-
-        // FNQ Functions
-        function recordFNQ() {
-            const truckNo = document.getElementById('fnqTruckNo').value.trim();
-            const gp = document.getElementById('fnqGP').value.trim();
-            const driver = document.getElementById('fnqDriver').value.trim();
-            const time = document.getElementById('fnqTime').value;
-            
-            if (!truckNo || !gp) {
-                alert('Please enter truck number and gate pass!');
-                return;
-            }
-            
-            const data = getTodayData('fnq');
-            data.push({
-                id: Date.now(),
-                truckNo,
-                gp,
-                driver: driver || '-',
-                timeIn: time,
-                timeOut: null,
-                status: 'inside',
-                createdBy: currentUser.email
-            });
-            
-            saveTodayData('fnq', data);
-            document.getElementById('fnqTruckNo').value = '';
-            document.getElementById('fnqGP').value = '';
-            document.getElementById('fnqDriver').value = '';
-            renderFNQTable();
-            alert('Entry recorded!');
-        }
-        
-        function recordFNQExit(id) {
-            const timeOut = prompt('Enter exit time (HH:MM):', new Date().toTimeString().slice(0, 5));
-            if (!timeOut) return;
-            
-            const data = getTodayData('fnq');
-            const item = data.find(r => r.id === id);
-            if (!item) return;
-            
-            item.timeOut = timeOut;
-            item.status = 'completed';
-            
-            saveTodayData('fnq', data);
-            renderFNQTable();
-            alert('Exit recorded!');
-        }
-        
-        function deleteFNQ(id) {
-            if (!confirm('Are you sure you want to delete this entry?')) return;
-            
-            const data = getTodayData('fnq').filter(r => r.id !== id);
-            saveTodayData('fnq', data);
-            renderFNQTable();
-        }
-        
-        function renderFNQTable() {
-            const data = getTodayData('fnq');
-            const insideBody = document.getElementById('fnqInsideBody');
-            const completedBody = document.getElementById('fnqCompletedBody');
-            
-            const inside = data.filter(r => r.status === 'inside');
-            const completed = data.filter(r => r.status === 'completed');
-            
-            // Inside table (editable)
-            if (inside.length === 0) {
-                insideBody.innerHTML = '<tr><td colspan="6" style="color: #7f8c8d; text-align: center; padding: 30px;">No trucks inside</td></tr>';
-            } else {
-                insideBody.innerHTML = inside.map((item, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.truckNo}</td>
-                        <td>${item.gp}</td>
-                        <td>${item.driver}</td>
-                        <td>${item.timeIn}</td>
-                        <td class="action-btns">
-                            <button class="btn-small btn-success" onclick="recordFNQExit(${item.id})">Exit</button>
-                            <button class="btn-small btn-danger" onclick="deleteFNQ(${item.id})">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-            
-            // Completed table (read only)
-            if (completed.length === 0) {
-                completedBody.innerHTML = '<tr><td colspan="6" style="color: #7f8c8d; text-align: center; padding: 20px;">No completed exits</td></tr>';
-            } else {
-                completedBody.innerHTML = completed.map((item, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.truckNo}</td>
-                        <td>${item.gp}</td>
-                        <td>${item.timeIn}</td>
-                        <td>${item.timeOut}</td>
-                        <td>${calculateDuration(item.timeIn, item.timeOut)}</td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        // Visitors Functions
-        function recordVisitor() {
-            const name = document.getElementById('visitorName').value.trim();
-            const company = document.getElementById('visitorCompany').value.trim();
-            const vehicle = document.getElementById('visitorVehicle').value.trim();
-            const destination = document.getElementById('visitorDestination').value;
-            const purpose = document.getElementById('visitorPurpose').value.trim();
-            const time = document.getElementById('visitorTime').value;
-            
-            if (!name || !company) {
-                alert('Please enter visitor name and company!');
-                return;
-            }
-            
-            const data = getTodayData('visitors');
-            data.push({
-                id: Date.now(),
-                name,
-                company,
-                vehicle: vehicle || '-',
-                destination,
-                purpose: purpose || '-',
-                timeIn: time,
-                timeOut: null,
-                status: 'inside',
-                createdBy: currentUser.email
-            });
-            
-            saveTodayData('visitors', data);
-            document.getElementById('visitorName').value = '';
-            document.getElementById('visitorCompany').value = '';
-            document.getElementById('visitorVehicle').value = '';
-            document.getElementById('visitorPurpose').value = '';
-            renderVisitorsTable();
-            alert('Visitor recorded!');
-        }
-        
-        function recordVisitorExit(id) {
-            const timeOut = prompt('Enter exit time (HH:MM):', new Date().toTimeString().slice(0, 5));
-            if (!timeOut) return;
-            
-            const data = getTodayData('visitors');
-            const item = data.find(r => r.id === id);
-            if (!item) return;
-            
-            item.timeOut = timeOut;
-            item.status = 'completed';
-            
-            saveTodayData('visitors', data);
-            renderVisitorsTable();
-            alert('Exit recorded!');
-        }
-        
-        function deleteVisitor(id) {
-            if (!confirm('Are you sure you want to delete this visitor?')) return;
-            
-            const data = getTodayData('visitors').filter(r => r.id !== id);
-            saveTodayData('visitors', data);
-            renderVisitorsTable();
-        }
-        
-        function renderVisitorsTable() {
-            const data = getTodayData('visitors');
-            const insideBody = document.getElementById('visitorsInsideBody');
-            const completedBody = document.getElementById('visitorsCompletedBody');
-            
-            const inside = data.filter(r => r.status === 'inside');
-            const completed = data.filter(r => r.status === 'completed');
-            
-            // Inside table (editable)
-            if (inside.length === 0) {
-                insideBody.innerHTML = '<tr><td colspan="7" style="color: #7f8c8d; text-align: center; padding: 30px;">No visitors inside</td></tr>';
-            } else {
-                insideBody.innerHTML = inside.map((item, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.name}</td>
-                        <td>${item.company}</td>
-                        <td>${item.vehicle}</td>
-                        <td>${item.destination}</td>
-                        <td>${item.timeIn}</td>
-                        <td class="action-btns">
-                            <button class="btn-small btn-success" onclick="recordVisitorExit(${item.id})">Exit</button>
-                            <button class="btn-small btn-danger" onclick="deleteVisitor(${item.id})">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-            
-            // Completed table (read only)
-            if (completed.length === 0) {
-                completedBody.innerHTML = '<tr><td colspan="7" style="color: #7f8c8d; text-align: center; padding: 20px;">No completed visits</td></tr>';
-            } else {
-                completedBody.innerHTML = completed.map((item, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.name}</td>
-                        <td>${item.company}</td>
-                        <td>${item.destination}</td>
-                        <td>${item.timeIn}</td>
-                        <td>${item.timeOut}</td>
-                        <td>${calculateDuration(item.timeIn, item.timeOut)}</td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        // Gate Pass Functions
-        function issueGatePass() {
-            const number = document.getElementById('gpNumber').value.trim();
-            const department = document.getElementById('gpDepartment').value;
-            const time = document.getElementById('gpTime').value;
-            
-            if (!number) {
-                alert('Please enter gate pass number!');
-                return;
-            }
-            
-            const data = getTodayData('gatepass');
-            data.push({
-                id: Date.now(),
-                number,
-                department,
-                issueTime: time,
-                returnTime: null,
-                status: 'out',
-                createdBy: currentUser.email
-            });
-            
-            saveTodayData('gatepass', data);
-            document.getElementById('gpNumber').value = '';
-            renderGatePassTable();
-            alert('Gate Pass issued!');
-        }
-        
-        function returnGatePass(id) {
-            const returnTime = prompt('Enter return time (HH:MM):', new Date().toTimeString().slice(0, 5));
-            if (!returnTime) return;
-            
-            const data = getTodayData('gatepass');
-            const item = data.find(r => r.id === id);
-            if (!item) return;
-            
-            item.returnTime = returnTime;
-            item.status = 'returned';
-            
-            saveTodayData('gatepass', data);
-            renderGatePassTable();
-            alert('Gate Pass returned!');
-        }
-        
-        function renderGatePassTable() {
-            const data = getTodayData('gatepass');
-            const activeBody = document.getElementById('gpActiveBody');
-            const returnedBody = document.getElementById('gpReturnedBody');
-            
-            const active = data.filter(r => r.status === 'out');
-            const returned = data.filter(r => r.status === 'returned');
-            
-            // Active table
-            if (active.length === 0) {
-                activeBody.innerHTML = '<tr><td colspan="5" style="color: #7f8c8d; text-align: center; padding: 30px;">No active gate passes</td></tr>';
-            } else {
-                activeBody.innerHTML = active.map((item, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.number}</td>
-                        <td>${item.department}</td>
-                        <td>${item.issueTime}</td>
-                        <td class="action-btns">
-                            <button class="btn-small btn-success" onclick="returnGatePass(${item.id})">Mark IN</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
-            
-            // Returned table (read only)
-            if (returned.length === 0) {
-                returnedBody.innerHTML = '<tr><td colspan="5" style="color: #7f8c8d; text-align: center; padding: 20px;">No returned gate passes</td></tr>';
-            } else {
-                returnedBody.innerHTML = returned.map((item, index) => `
-                    <tr>
-                        <td>${index + 1}</td>
-                        <td>${item.number}</td>
-                        <td>${item.department}</td>
-                        <td>${item.issueTime}</td>
-                        <td>${item.returnTime}</td>
-                    </tr>
-                `).join('');
-            }
-        }
-
-        // History Functions
-        function searchHistory() {
-            const dept = document.getElementById('historyDept').value;
-            const fromDate = document.getElementById('historyFromDate').value;
-            const fromTime = document.getElementById('historyFromTime').value;
-            const toDate = document.getElementById('historyToDate').value;
-            const toTime = document.getElementById('historyToTime').value;
-            
-            if (!fromDate || !toDate) {
-                alert('Please select date range!');
-                return;
-            }
-            
-            const types = dept === 'all' ? ['fcp', 'fnq', 'visitors', 'gatepass'] : [dept];
-            let allResults = [];
-            
-            // Get data from both current and history
-            types.forEach(type => {
-                // Current day data
-                const currentData = getTodayData(type);
-                currentData.forEach(item => {
-                    item.type = type;
-                    item.source = 'current';
-                });
-                allResults = allResults.concat(currentData);
-                
-                // Historical data (get all dates between from and to)
-                const from = new Date(fromDate);
-                const to = new Date(toDate);
-                for (let d = new Date(from); d <= to; d.setDate(d.getDate() + 1)) {
-                    const dateStr = formatDate(d);
-                    if (dateStr !== formatDate(new Date())) {
-                        const histData = getHistoryData(type, dateStr);
-                        histData.forEach(item => {
-                            item.type = type;
-                            item.source = 'history';
-                            item.date = dateStr;
-                        });
-                        allResults = allResults.concat(histData);
-                    }
-                }
-            });
-            
-            // Filter by time
-            allResults = allResults.filter(item => {
-                const itemTime = item.timeIn || item.timeOut || item.issueTime || '00:00';
-                return itemTime >= fromTime && itemTime <= toTime;
-            });
-            
-            displayHistoryResults(allResults, dept);
-        }
-        
-        function displayHistoryResults(results, dept) {
-            const container = document.getElementById('historyResultsContainer');
-            const resultsDiv = document.getElementById('historyResults');
-            
-            if (results.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #7f8c8d; padding: 30px;">No records found</p>';
-                resultsDiv.style.display = 'block';
-                return;
-            }
-            
-            let html = '<table border="1" cellpadding="10"><thead><tr>';
-            html += '<th>#</th><th>Type</th><th>Date</th><th>Details</th><th>Time</th><th>Status</th>';
-            html += '</tr></thead><tbody>';
-            
-            results.forEach((item, index) => {
-                let details = '';
-                if (item.type === 'fcp') details = `Truck: ${item.truckNo}, GP: ${item.gp}`;
-                else if (item.type === 'fnq') details = `Truck: ${item.truckNo}, GP: ${item.gp}`;
-                else if (item.type === 'visitors') details = `${item.name} - ${item.company}`;
-                else if (item.type === 'gatepass') details = `GP: ${item.number} (${item.department})`;
-                
-                const time = item.timeIn || item.timeOut || item.issueTime || '-';
-                const status = item.status || '-';
-                const date = item.date || formatDate(new Date());
-                
-                html += `<tr>
-                    <td>${index + 1}</td>
-                    <td>${item.type.toUpperCase()}</td>
-                    <td>${formatDateDisplay(date)}</td>
-                    <td>${details}</td>
-                    <td>${time}</td>
-                    <td>${status}</td>
-                </tr>`;
-            });
-            
-            html += '</tbody></table>';
-            container.innerHTML = html;
-            resultsDiv.style.display = 'block';
-        }
-
-        // Users Functions
-        document.getElementById('addUserForm').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            if (!isAdmin) {
-                alert('Only admin can create users!');
-                return;
-            }
-            
-            pendingAction = 'createUser';
-            createNewUser();
-        });
-        
-        async function createNewUser() {
-            const email = document.getElementById('newUserEmail').value;
-            const password = document.getElementById('newUserPassword').value;
-            const role = document.getElementById('newUserRole').value;
-            
-            try {
-                // Create user in Firebase Auth
-                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-                
-                // Save to Firestore
-                await db.collection('users').doc(userCredential.user.uid).set({
-                    email: email,
-                    role: role,
-                    createdBy: currentUser.email,
-                    createdAt: new Date().toISOString()
-                });
-                
-                document.getElementById('addUserForm').reset();
-                loadUsers();
-                alert('User created successfully!');
-            } catch (error) {
-                alert('Error creating user: ' + error.message);
-            }
-        }
-        
-        async function loadUsers() {
-            if (!isAdmin) return;
-            
-            try {
-                const snapshot = await db.collection('users').get();
-                const tbody = document.getElementById('usersTable');
-                
-                tbody.innerHTML = '';
-                snapshot.forEach(doc => {
-                    const user = doc.data();
-                    tbody.innerHTML += `
-                        <tr>
-                            <td>${user.email}</td>
-                            <td>${user.role}</td>
-                            <td>${new Date(user.createdAt).toLocaleDateString()}</td>
-                        </tr>
-                    `;
-                });
-            } catch (error) {
-                console.error('Error loading users:', error);
-            }
-        }
-
-        // Helper Functions
-        function calculateDuration(timeIn, timeOut) {
-            if (!timeIn || !timeOut || timeIn === '-' || timeOut === '-') return '-';
-            
-            const [h1, m1] = timeIn.split(':').map(Number);
-            const [h2, m2] = timeOut.split(':').map(Number);
-            
-            let diff = (h2 * 60 + m2) - (h1 * 60 + m1);
-            if (diff < 0) diff += 24 * 60;
-            
-            const hours = Math.floor(diff / 60);
-            const mins = diff % 60;
-            
-            return `${hours}h ${mins}m`;
-        }
-        
-        function renderAllTables() {
-            renderFCPTable();
-            renderFNQTable();
-            renderVisitorsTable();
-            renderGatePassTable();
-        }
-
-        // Print Functions
-        function printReport(type) {
-            const data = getTodayData(type);
-            const printWindow = window.open('', '_blank');
-            const dateStr = document.getElementById('currentDate').textContent;
-            
-            let content = '';
-            let title = '';
-            
-            switch(type) {
-                case 'fcp':
-                    title = 'FCP - Daily Report';
-                    content = `
-                        <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse;">
-                            <tr style="background:#2c3e50; color:white;">
-                                <th>#</th><th>Truck No.</th><th>GP No.</th><th>Time In</th><th>Time Out</th><th>Status</th>
-                            </tr>
-                            ${data.map((item, i) => `
-                                <tr>
-                                    <td>${i+1}</td>
-                                    <td>${item.truckNo}</td>
-                                    <td>${item.gp}</td>
-                                    <td>${item.timeIn}</td>
-                                    <td>${item.timeOut}</td>
-                                    <td>${item.status.toUpperCase()}</td>
-                                </tr>
-                            `).join('')}
-                        </table>
-                    `;
-                    break;
-                case 'fnq':
-                    title = 'FNQ - Quarry Report';
-                    const fnqInside = data.filter(r => r.status === 'inside');
-                    const fnqCompleted = data.filter(r => r.status === 'completed');
-                    content = `
-                        <h3>Inside Quarry</h3>
-                        <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse; margin-bottom:20px;">
-                            <tr style="background:#27ae60; color:white;">
-                                <th>#</th><th>Truck No.</th><th>Gate Pass</th><th>Driver</th><th>Entry Time</th>
-                            </tr>
-                            ${fnqInside.map((item, i) => `
-                                <tr>
-                                    <td>${i+1}</td>
-                                    <td>${item.truckNo}</td>
-                                    <td>${item.gp}</td>
-                                    <td>${item.driver}</td>
-                                    <td>${item.timeIn}</td>
-                                </tr>
-                            `).join('')}
-                        </table>
-                        <h3>Completed Exits</h3>
-                        <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse;">
-                            <tr style="background:#34495e; color:white;">
-                                <th>#</th><th>Truck No.</th><th>Gate Pass</th><th>Time In</th><th>Time Out</th><th>Duration</th>
-                            </tr>
-                            ${fnqCompleted.map((item, i) => `
-                                <tr>
-                                    <td>${i+1}</td>
-                                    <td>${item.truckNo}</td>
-                                    <td>${item.gp}</td>
-                                    <td>${item.timeIn}</td>
-                                    <td>${item.timeOut}</td>
-                                    <td>${calculateDuration(item.timeIn, item.timeOut)}</td>
-                                </tr>
-                            `).join('')}
-                        </table>
-                    `;
-                    break;
-                case 'visitors':
-                    title = 'Visitors Report';
-                    const visInside = data.filter(r => r.status === 'inside');
-                    const visCompleted = data.filter(r => r.status === 'completed');
-                    content = `
-                        <h3>Current Visitors</h3>
-                        <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse; margin-bottom:20px;">
-                            <tr style="background:#f39c12; color:white;">
-                                <th>#</th><th>Name</th><th>Company</th><th>Destination</th><th>Entry Time</th>
-                            </tr>
-                            ${visInside.map((item, i) => `
-                                <tr>
-                                    <td>${i+1}</td>
-                                    <td>${item.name}</td>
-                                    <td>${item.company}</td>
-                                    <td>${item.destination}</td>
-                                    <td>${item.timeIn}</td>
-                                </tr>
-                            `).join('')}
-                        </table>
-                        <h3>Completed Visits</h3>
-                        <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse;">
-                            <tr style="background:#34495e; color:white;">
-                                <th>#</th><th>Name</th><th>Company</th><th>Destination</th><th>Time In</th><th>Time Out</th><th>Duration</th>
-                            </tr>
-                            ${visCompleted.map((item, i) => `
-                                <tr>
-                                    <td>${i+1}</td>
-                                    <td>${item.name}</td>
-                                    <td>${item.company}</td>
-                                    <td>${item.destination}</td>
-                                    <td>${item.timeIn}</td>
-                                    <td>${item.timeOut}</td>
-                                    <td>${calculateDuration(item.timeIn, item.timeOut)}</td>
-                                </tr>
-                            `).join('')}
-                        </table>
-                    `;
-                    break;
-                case 'gatepass':
-                    title = 'Gate Pass Report';
-                    const gpActive = data.filter(r => r.status === 'out');
-                    const gpReturned = data.filter(r => r.status === 'returned');
-                    content = `
-                        <h3>Active (OUT)</h3>
-                        <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse; margin-bottom:20px;">
-                            <tr style="background:#e74c3c; color:white;">
-                                <th>#</th><th>GP Number</th><th>Department</th><th>Issue Time</th>
-                            </tr>
-                            ${gpActive.map((item, i) => `
-                                <tr>
-                                    <td>${i+1}</td>
-                                    <td>${item.number}</td>
-                                    <td>${item.department}</td>
-                                    <td>${item.issueTime}</td>
-                                </tr>
-                            `).join('')}
-                        </table>
-                        <h3>Returned (IN)</h3>
-                        <table border="1" cellpadding="8" style="width:100%; border-collapse: collapse;">
-                            <tr style="background:#27ae60; color:white;">
-                                <th>#</th><th>GP Number</th><th>Department</th><th>Issue Time</th><th>Return Time</th>
-                            </tr>
-                            ${gpReturned.map((item, i) => `
-                                <tr>
-                                    <td>${i+1}</td>
-                                    <td>${item.number}</td>
-                                    <td>${item.department}</td>
-                                    <td>${item.issueTime}</td>
-                                    <td>${item.returnTime}</td>
-                                </tr>
-                            `).join('')}
-                        </table>
-                    `;
-                    break;
-            }
-            
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>${title}</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        h1 { color: #2c3e50; text-align: center; }
-                        h2 { color: #7f8c8d; text-align: center; font-size: 14px; margin-bottom: 20px; }
-                        h3 { color: #34495e; margin-top: 20px; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background: #f2f2f2; font-weight: bold; }
-                        tr:nth-child(even) { background: #f9f9f9; }
-                    </style>
-                </head>
-                <body>
-                    <h1>AMG - ${title}</h1>
-                    <h2>Date: ${dateStr}</h2>
-                    ${content}
-                    <script>window.print();<\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
-        
-        function printHistoryResults() {
-            const container = document.getElementById('historyResultsContainer');
-            const printWindow = window.open('', '_blank');
-            
-            printWindow.document.write(`
-                <html>
-                <head>
-                    <title>History Report</title>
-                    <style>
-                        body { font-family: Arial, sans-serif; padding: 20px; }
-                        h1 { color: #2c3e50; text-align: center; }
-                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-                        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-                        th { background: #2c3e50; color: white; }
-                        tr:nth-child(even) { background: #f9f9f9; }
-                    </style>
-                </head>
-                <body>
-                    <h1>AMG - History Report</h1>
-                    ${container.innerHTML}
-                    <script>window.print();<\/script>
-                </body>
-                </html>
-            `);
-            printWindow.document.close();
-        }
-    </script>
+      }
+    })();
+  </script>
 </body>
 </html>
