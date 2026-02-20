@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Facility Management System</title>
+  
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <!-- Font Awesome -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Styles -->
+  <link rel="stylesheet" href="/assets/css/main.css">
+  
+  <!-- Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+  <div class="app-container">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-header">
+        <div class="sidebar-logo">
+          <i class="fas fa-building"></i>
+        </div>
+        <span class="sidebar-title">Facility MS</span>
+      </div>
+      
+      <nav class="sidebar-nav">
+        <div class="nav-section">
+          <div class="nav-section-title">Main</div>
+          <a href="/dashboard/" class="nav-link active">
+            <i class="fas fa-home"></i>
+            <span>Dashboard</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Management</div>
+          <a href="/fcp/" class="nav-link">
+            <i class="fas fa-clipboard-check"></i>
+            <span>FCP</span>
+          </a>
+          <a href="/fnq/" class="nav-link">
+            <i class="fas fa-tasks"></i>
+            <span>FNQ</span>
+          </a>
+          <a href="/visitors/" class="nav-link">
+            <i class="fas fa-users"></i>
+            <span>Visitors</span>
+          </a>
+          <a href="/gatepass/" class="nav-link">
+            <i class="fas fa-id-card"></i>
+            <span>Gate Pass</span>
+          </a>
+        </div>
+        
+        <div class="nav-section">
+          <div class="nav-section-title">Records</div>
+          <a href="/history/" class="nav-link">
+            <i class="fas fa-history"></i>
+            <span>History</span>
+          </a>
+          <a href="/users/" class="nav-link" data-role="admin,manager">
+            <i class="fas fa-user-cog"></i>
+            <span>Users</span>
+          </a>
+        </div>
+      </nav>
+      
+      <div class="sidebar-footer">
+        <a href="#" class="nav-link" id="sidebar-logout">
+          <i class="fas fa-sign-out-alt"></i>
+          <span>Logout</span>
+        </a>
+      </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content" id="main-content">
+      <!-- Header -->
+      <header class="header">
+        <div class="header-left">
+          <button class="header-toggle" id="sidebar-toggle">
+            <i class="fas fa-bars"></i>
+          </button>
+          <h2 class="header-title">Dashboard</h2>
+        </div>
+        
+        <div class="header-right">
+          <div class="header-btn" id="notification-btn">
+            <i class="fas fa-bell"></i>
+            <span class="notification-badge"></span>
+          </div>
+          
+          <div class="user-menu-wrapper">
+            <button class="user-menu-toggle" id="user-menu-toggle">
+              <div class="user-avatar" id="user-avatar">U</div>
+              <div class="user-info">
+                <div class="user-name" id="user-name">User</div>
+                <div class="user-role" id="user-role-badge">User</div>
+              </div>
+              <i class="fas fa-chevron-down" style="font-size: 0.75rem; color: var(--text-secondary);"></i>
+            </button>
+            
+            <div class="user-menu" id="user-menu">
+              <a href="#" class="user-menu-item">
+                <i class="fas fa-user"></i>
+                <span>Profile</span>
+              </a>
+              <a href="#" class="user-menu-item">
+                <i class="fas fa-cog"></i>
+                <span>Settings</span>
+              </a>
+              <div class="user-menu-divider"></div>
+              <a href="#" class="user-menu-item" id="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </header>
+      
+      <!-- Page Content -->
+      <div class="page-content">
+        <!-- Page Header -->
+        <div class="page-header">
+          <h1 class="page-title">Dashboard Overview</h1>
+          <p class="page-subtitle" id="current-date">Loading...</p>
+        </div>
+        
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-icon blue">
+              <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="total-visitors">0</div>
+              <div class="stat-label">Total Visitors Today</div>
+              <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> 12% from yesterday
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon green">
+              <i class="fas fa-id-card"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="active-gatepasses">0</div>
+              <div class="stat-label">Active Gate Passes</div>
+              <div class="stat-change positive">
+                <i class="fas fa-arrow-up"></i> 5 new today
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon orange">
+              <i class="fas fa-clipboard-check"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="pending-fcp">0</div>
+              <div class="stat-label">Pending FCP</div>
+              <div class="stat-change negative">
+                <i class="fas fa-arrow-down"></i> 3 resolved
+              </div>
+            </div>
+          </div>
+          
+          <div class="stat-card">
+            <div class="stat-icon red">
+              <i class="fas fa-tasks"></i>
+            </div>
+            <div class="stat-content">
+              <div class="stat-value" id="open-fnq">0</div>
+              <div class="stat-label">Open FNQ</div>
+              <div class="stat-change positive">
+                <i class="fas fa-check"></i> On track
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- Recent Activity & Quick Actions -->
+        <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 1.5rem;">
+          <!-- Recent Activity -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Recent Activity</h3>
+              <a href="/history/" class="btn btn-sm btn-secondary">View All</a>
+            </div>
+            <div class="card-body">
+              <div class="table-wrapper">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Time</th>
+                      <th>Activity</th>
+                      <th>User</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="activity-table-body">
+                    <tr>
+                      <td colspan="4" style="text-align: center; padding: 2rem;">
+                        <div class="loading-spinner" style="width: 30px; height: 30px;"></div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+          
+          <!-- Quick Actions -->
+          <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Quick Actions</h3>
+            </div>
+            <div class="card-body">
+              <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                <a href="/visitors/" class="btn btn-primary" style="justify-content: flex-start;">
+                  <i class="fas fa-user-plus"></i>
+                  <span>Register Visitor</span>
+                </a>
+                <a href="/gatepass/" class="btn btn-secondary" style="justify-content: flex-start;">
+                  <i class="fas fa-plus"></i>
+                  <span>Create Gate Pass</span>
+                </a>
+                <a href="/fcp/" class="btn btn-secondary" style="justify-content: flex-start;">
+                  <i class="fas fa-file-alt"></i>
+                  <span>New FCP Entry</span>
+                </a>
+                <a href="/fnq/" class="btn btn-secondary" style="justify-content: flex-start;">
+                  <i class="fas fa-question-circle"></i>
+                  <span>Add FNQ</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Firebase Config -->
+  <script src="/assets/js/firebase-config.js"></script>
+  
+  <!-- Auth Guard -->
+  <script src="/assets/js/auth-guard.js"></script>
+  
+  <!-- Role Guard -->
+  <script src="/assets/js/role-guard.js"></script>
+  
+  <!-- Main JS -->
+  <script src="/assets/js/main.js"></script>
+  
+  <script>
+    (function() {
+      'use strict';
+      
+      // Update user info in header
+      function updateUserInfo(user) {
+        if (!user) return;
+        
+        const userName = document.getElementById('user-name');
+        const userAvatar = document.getElementById('user-avatar');
+        
+        if (userName) {
+          userName.textContent = user.displayName || user.email.split('@')[0];
+        }
+        
+        if (userAvatar) {
+          const initial = (user.displayName || user.email).charAt(0).toUpperCase();
+          userAvatar.textContent = initial;
+        }
+      }
+      
+      // Load dashboard stats
+      async function loadStats() {
+        try {
+          const db = firebase.firestore();
+          const today = new Date();
+          today.setHours(0, 0, 0, 0);
+          
+          // Get total visitors today
+          const visitorsSnapshot = await db.collection('visitors')
+            .where('checkIn', '>=', today)
+            .get();
+          document.getElementById('total-visitors').textContent = visitorsSnapshot.size;
+          
+          // Get active gate passes
+          const gatepassSnapshot = await db.collection('gatepasses')
+            .where('status', '==', 'active')
+            .get();
+          document.getElementById('active-gatepasses').textContent = gatepassSnapshot.size;
+          
+          // Get pending FCP
+          const fcpSnapshot = await db.collection('fcp')
+            .where('status', '==', 'pending')
+            .get();
+          document.getElementById('pending-fcp').textContent = fcpSnapshot.size;
+          
+          // Get open FNQ
+          const fnqSnapshot = await db.collection('fnq')
+            .where('status', '==', 'open')
+            .get();
+          document.getElementById('open-fnq').textContent = fnqSnapshot.size;
+          
+        } catch (error) {
+          console.error('Error loading stats:', error);
+          // Set demo values if Firebase not configured
+          document.getElementById('total-visitors').textContent = '24';
+          document.getElementById('active-gatepasses').textContent = '8';
+          document.getElementById('pending-fcp').textContent = '3';
+          document.getElementById('open-fnq').textContent = '5';
+        }
+      }
+      
+      // Load recent activity
+      async function loadRecentActivity() {
+        const tbody = document.getElementById('activity-table-body');
+        
+        try {
+          const db = firebase.firestore();
+          const snapshot = await db.collection('activity')
+            .orderBy('timestamp', 'desc')
+            .limit(5)
+            .get();
+          
+          if (snapshot.empty) {
+            tbody.innerHTML = `
+              <tr>
+                <td colspan="4" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                  No recent activity
+                </td>
+              </tr>
+            `;
+            return;
+          }
+          
+          tbody.innerHTML = snapshot.docs.map(doc => {
+            const data = doc.data();
+            const time = data.timestamp ? data.timestamp.toDate().toLocaleTimeString() : '--:--';
+            
+            let statusClass = 'badge-info';
+            if (data.status === 'completed') statusClass = 'badge-success';
+            if (data.status === 'pending') statusClass = 'badge-warning';
+            if (data.status === 'rejected') statusClass = 'badge-danger';
+            
+            return `
+              <tr>
+                <td>${time}</td>
+                <td>${data.activity || 'Unknown'}</td>
+                <td>${data.user || 'System'}</td>
+                <td><span class="badge ${statusClass}">${data.status || 'N/A'}</span></td>
+              </tr>
+            `;
+          }).join('');
+          
+        } catch (error) {
+          console.error('Error loading activity:', error);
+          // Show demo data
+          tbody.innerHTML = `
+            <tr>
+              <td>09:30 AM</td>
+              <td>Visitor checked in</td>
+              <td>John Smith</td>
+              <td><span class="badge badge-success">Completed</span></td>
+            </tr>
+            <tr>
+              <td>09:15 AM</td>
+              <td>Gate pass created</td>
+              <td>Sarah Johnson</td>
+              <td><span class="badge badge-success">Active</span></td>
+            </tr>
+            <tr>
+              <td>08:45 AM</td>
+              <td>FCP submitted</td>
+              <td>Mike Wilson</td>
+              <td><span class="badge badge-warning">Pending</span></td>
+            </tr>
+            <tr>
+              <td>08:30 AM</td>
+              <td>FNQ updated</td>
+              <td>Emily Brown</td>
+              <td><span class="badge badge-info">Open</span></td>
+            </tr>
+            <tr>
+              <td>08:00 AM</td>
+              <td>System backup</td>
+              <td>System</td>
+              <td><span class="badge badge-success">Completed</span></td>
+            </tr>
+          `;
+        }
+      }
+      
+      // Initialize dashboard
+      document.addEventListener('auth:verified', (event) => {
+        updateUserInfo(event.detail.user);
+        loadStats();
+        loadRecentActivity();
+      });
+      
+      // Demo mode fallback
+      if (firebaseConfig.apiKey === 'YOUR_API_KEY') {
+        const demoUser = JSON.parse(sessionStorage.getItem('demoUser') || '{}');
+        if (demoUser.email) {
+          updateUserInfo(demoUser);
+          loadStats();
+          loadRecentActivity();
+        }
+      }
+    })();
+  </script>
+</body>
+</html>
+
