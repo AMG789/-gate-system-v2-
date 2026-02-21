@@ -237,8 +237,19 @@
                 <a href="/users/" class="nav-tab hidden" id="usersTab">USERS</a>
             </div>
 
+            <!-- Firebase Warning Banner (hidden by default) -->
+            <div id="firebaseWarning" class="welcome-banner" style="background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%); display: none;">
+                <div>
+                    <h1>⚠️ Firebase Not Configured</h1>
+                    <p>Please complete Firebase setup to enable all features</p>
+                </div>
+                <button class="export-btn" onclick="window.location.href='/firebase-setup.html'">
+                    📖 Setup Guide
+                </button>
+            </div>
+
             <!-- Welcome Banner -->
-            <div class="welcome-banner">
+            <div class="welcome-banner" id="welcomeBanner">
                 <div>
                     <h1>👋 Welcome to Gate Management System</h1>
                     <p>Track and manage all vehicle and visitor movements efficiently</p>
@@ -350,18 +361,27 @@
     <script src="/assets/js/utils.js"></script>
     <script src="/assets/js/excel-export.js"></script>
     <script>
+        // Check Firebase initialization
+        if (!firebaseInitialized) {
+            document.getElementById('firebaseWarning').style.display = 'flex';
+            document.getElementById('welcomeBanner').style.display = 'none';
+            document.getElementById('currentUser').textContent = 'Not Connected';
+        }
+        
         // Check auth state
         checkAuth((loggedIn) => {
-            if (!loggedIn) {
+            if (!loggedIn && firebaseInitialized) {
                 window.location.href = '/index.html';
                 return;
             }
             
-            document.getElementById('currentUser').textContent = currentUser.email;
-            
-            if (isAdmin) {
-                document.getElementById('adminBadge').classList.remove('hidden');
-                document.getElementById('usersTab').classList.remove('hidden');
+            if (currentUser) {
+                document.getElementById('currentUser').textContent = currentUser.email;
+                
+                if (isAdmin) {
+                    document.getElementById('adminBadge').classList.remove('hidden');
+                    document.getElementById('usersTab').classList.remove('hidden');
+                }
             }
             
             loadDashboardStats();
