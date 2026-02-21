@@ -110,7 +110,7 @@
                 <a href="/gatepass/" class="nav-tab">GATE PASS</a>
                 <a href="/members/" class="nav-tab">MEMBERS</a>
                 <a href="/history/" class="nav-tab">HISTORY</a>
-                <a href="/users/" class="nav-tab active" id="usersTab">USERS</a>
+                <a href="/users/" class="nav-tab active">USERS</a>
             </div>
 
             <!-- Users Section -->
@@ -186,6 +186,8 @@
     <script src="/assets/js/firebase-config.js"></script>
     <script src="/assets/js/utils.js"></script>
     <script>
+        let pageIsAdmin = false;
+        
         // Check auth state - Admin only
         checkAuth((loggedIn) => {
             if (!loggedIn) {
@@ -193,8 +195,11 @@
                 return;
             }
             
+            // Check admin status directly
+            pageIsAdmin = currentUser.email.toLowerCase() === MASTER_ADMIN.toLowerCase();
+            
             // Only admin can access this page
-            if (!isAdmin) {
+            if (!pageIsAdmin) {
                 alert('⛔ Only admin can access this page!');
                 window.location.href = '/dashboard/';
                 return;
@@ -210,7 +215,7 @@
         document.getElementById('addUserForm').addEventListener('submit', async (e) => {
             e.preventDefault();
             
-            if (!isAdmin) {
+            if (!pageIsAdmin) {
                 alert('Only admin can create users!');
                 return;
             }
@@ -240,7 +245,7 @@
         });
         
         async function loadUsers() {
-            if (!isAdmin) return;
+            if (!pageIsAdmin) return;
             
             try {
                 const snapshot = await db.collection('users').get();
