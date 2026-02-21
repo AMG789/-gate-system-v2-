@@ -114,25 +114,53 @@ function calculateDuration(timeIn, timeOut) {
 function setupNetworkListeners() {
     const statusEl = document.getElementById('connectionStatus');
     
-    window.addEventListener('online', () => { 
-        isOnline = true; 
-        if (statusEl) {
+    // Update connection status display
+    async function updateConnectionStatus() {
+        if (!statusEl) return;
+        
+        // Check browser online status
+        const browserOnline = navigator.onLine;
+        
+        // Check Firebase connection
+        let firebaseOnline = false;
+        if (typeof checkFirebaseConnection === 'function') {
+            firebaseOnline = await checkFirebaseConnection();
+        }
+        
+        // Determine overall status
+        if (browserOnline && firebaseOnline) {
             statusEl.textContent = 'ONLINE';
             statusEl.className = 'connection-status online';
-        }
-    });
-    
-    window.addEventListener('offline', () => { 
-        isOnline = false; 
-        if (statusEl) {
+        } else if (browserOnline && !firebaseOnline) {
+            statusEl.textContent = 'FIREBASE ERROR';
+            statusEl.className = 'connection-status offline';
+            statusEl.title = 'Firebase not connected. Check console setup.';
+        } else {
             statusEl.textContent = 'OFFLINE';
             statusEl.className = 'connection-status offline';
         }
-    });
+    }
+    
+    // Initial check
+    updateConnectionStatus();
+    
+    // Check every 10 seconds
+    setInterval(updateConnectionStatus, 10000);
+    
+    window.addEventListener('online', updateConnectionStatus);
+    window.addEventListener('offline', updateConnectionStatus);
 }
 
 // Check Auth State
 function checkAuth(callback) {
+    // Check if Firebase is initialized
+    if (!firebaseInitialized || !auth) {
+        console.error('Firebase not initialized. Please check your Firebase Console setup.');
+        // Still allow access in offline mode for development
+        if (callback) callback(false);
+        return;
+    }
+    
     auth.onAuthStateChanged(async (user) => {
         if (user) {
             currentUser = user;
@@ -143,12 +171,21 @@ function checkAuth(callback) {
             isAdmin = false;
             if (callback) callback(false);
         }
+    }, (error) => {
+        console.error('Auth state error:', error);
+        if (callback) callback(false);
     });
 }
 
 // Logout
 async function logout() {
-    await auth.signOut();
+    if (auth) {
+        try {
+            await auth.signOut();
+        } catch (error) {
+            console.error('Logout error:', error);
+        }
+    }
     currentUser = null;
     isAdmin = false;
     window.location.href = '/index.html';
