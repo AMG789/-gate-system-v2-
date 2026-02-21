@@ -771,10 +771,13 @@
                 return;
             }
             
+            // Check admin status directly from currentUser
+            const userIsAdmin = currentUser && currentUser.email.toLowerCase() === MASTER_ADMIN.toLowerCase();
+            
             document.getElementById('currentUser').textContent = currentUser.email;
             
             // Determine user role
-            if (isAdmin) {
+            if (userIsAdmin) {
                 userRole = 'admin';
                 document.getElementById('userRole').textContent = 'ADMIN';
                 document.getElementById('userRole').className = 'role-indicator admin';
@@ -1222,9 +1225,4 @@
                                 <th>Job Title</th>
                                 <th>Gate</th>
                                 <th>Status</th>
-                                <th>Current Shift</th>
-                                <th>Shift Time</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-    
+                      
