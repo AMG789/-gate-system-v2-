@@ -551,12 +551,21 @@
 
     <script src="/assets/js/firebase-config.js"></script>
     <script>
+        // Check if Firebase is properly initialized
+        if (!firebaseInitialized) {
+            console.error('Firebase not initialized. Please enable Authentication in Firebase Console.');
+        }
+        
         // Check if already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                window.location.href = '/dashboard/';
-            }
-        });
+        if (auth) {
+            auth.onAuthStateChanged((user) => {
+                if (user) {
+                    window.location.href = '/dashboard/';
+                }
+            }, (error) => {
+                console.error('Auth check error:', error);
+            });
+        }
 
         // Toggle Password Visibility
         function togglePassword() {
@@ -576,6 +585,12 @@
 
         // Forgot Password
         function forgotPassword() {
+            // Check if Firebase is initialized
+            if (!firebaseInitialized || !auth) {
+                showError('Firebase not configured. Please enable Authentication in Firebase Console.');
+                return;
+            }
+            
             const email = document.getElementById('email').value;
             
             if (!email) {
@@ -613,6 +628,12 @@
         // Login Form
         document.getElementById('loginForm').addEventListener('submit', async (e) => {
             e.preventDefault();
+            
+            // Check if Firebase is initialized
+            if (!firebaseInitialized || !auth) {
+                showError('Firebase not configured. Please enable Authentication in Firebase Console.');
+                return;
+            }
             
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
@@ -664,6 +685,17 @@
                     case 'auth/invalid-credential':
                         errorMessage = 'Invalid email or password.';
                         break;
+                    case 'auth/invalid-api-key':
+                        errorMessage = 'Firebase configuration error. Please check your API key.';
+                        break;
+                    case 'auth/network-request-failed':
+                        errorMessage = 'Network error. Please check your internet connection.';
+                        break;
+                    case 'auth/internal-error':
+                        errorMessage = 'Firebase service error. Please ensure Authentication is enabled in Firebase Console.';
+                        break;
+                    default:
+                        errorMessage = `Error: ${error.message}`;
                 }
                 
                 showError(errorMessage);
